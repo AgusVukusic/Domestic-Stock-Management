@@ -3,7 +3,6 @@ from typing import Optional
 
 class Product(BaseModel):
     nombre: str                     #nombre del producto
-    precio: float                   #precio del producto
     cantidad: int                   #stock actual disponible
     categoria: str                  #categoria del producto (limpieza, comida, etc)
     notas: Optional[str] = None     #Opcional, puede ser None
