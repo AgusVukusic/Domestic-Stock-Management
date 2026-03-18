@@ -24,9 +24,9 @@ class Token(BaseModel):
 
 # Endpoint de registro de un nuevo usuario
 @router.post("/register", response_model=Token)
-def register(user: UserRegister):
+async def register(user: UserRegister): # AÑADIDO async
     # Verificar si el usuario ya existe
-    existing_user = get_user_by_username(user.username)
+    existing_user = await get_user_by_username(user.username) # AÑADIDO await
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -37,7 +37,7 @@ def register(user: UserRegister):
     hashed_password = hash_password(user.password)
     
     # Crear el usuario
-    new_user = create_user(user.username, hashed_password)
+    new_user = await create_user(user.username, hashed_password) # AÑADIDO await
     
     # Crear el token
     access_token = create_access_token(
@@ -54,9 +54,9 @@ def register(user: UserRegister):
 
 # Endpoint de login para un usuario existente
 @router.post("/login", response_model=Token)
-def login(user: UserLogin):
+async def login(user: UserLogin): # AÑADIDO async
     # Buscar el usuario
-    db_user = get_user_by_username(user.username)
+    db_user = await get_user_by_username(user.username) # AÑADIDO await
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

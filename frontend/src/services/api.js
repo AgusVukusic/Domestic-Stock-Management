@@ -46,6 +46,9 @@ export const productsAPI = {
   
   decreaseStock: (id, cantidad = 1) =>
     api.put(`/products/${id}/decrease`, null, { params: { cantidad } }),
+
+  increaseStock: (id, cantidad = 1) =>
+    api.put(`/products/${id}/increase`, null, { params: { cantidad } }),
   
   addToShoppingList: (id) =>
     api.put(`/products/${id}/add-to-shopping-list`),

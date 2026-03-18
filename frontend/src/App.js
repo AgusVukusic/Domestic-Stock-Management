@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ShoppingList from './pages/ShoppingList';
+import RegisterPurchase from './pages/RegisterPurchase';
 
 function App() {
   // Verificar si el usuario está autenticado
@@ -36,6 +37,16 @@ function App() {
           element={
             <PrivateRoute>
               <ShoppingList />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Ruta para registrar una compra extra que no este en la lista de compras */}
+        <Route 
+          path="/register-purchase"
+          element={
+            <PrivateRoute>
+              <RegisterPurchase />
             </PrivateRoute>
           }
         />

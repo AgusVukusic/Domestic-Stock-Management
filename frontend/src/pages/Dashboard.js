@@ -142,7 +142,7 @@ function Dashboard() {
             <span style={styles.btnIcon}>➕</span>
             Nuevo Producto
           </button>
-          <button onClick={() => navigate('/shopping-list')} style={{ ...styles.secondaryActionBtn, backgroundColor: theme.cardBg, color: theme.text, border: `2px solid ${theme.border}` }}>
+          <button onClick={() => navigate('/register-purchase')} style={{ ...styles.secondaryActionBtn, backgroundColor: theme.cardBg, color: theme.text, border: `2px solid ${theme.border}` }}>
             <span style={styles.btnIcon}>🛒</span>
             Registrar Compra
           </button>
@@ -247,100 +247,206 @@ function Dashboard() {
           ))
         )}
       </div>
+      
+    {/* Modal */}
+    {showModal && (
+    <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
+        <div 
+        style={{ 
+            ...styles.modal, 
+            backgroundColor: theme.cardBg,
+            padding: 0,
+            overflow: 'hidden',
+            borderRadius: '12px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        }} 
+        onClick={(e) => e.stopPropagation()}
+        >
+        {/* Nueva Cabecera Violeta */}
+        <div 
+            style={{ 
+            ...styles.modalHeader, 
+            backgroundColor: '#8b5cf6',
+            padding: '20px 24px',
+            margin: 0,
+            borderBottom: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <h2 style={{ ...styles.modalTitle, color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
+                Nuevo Producto
+            </h2>
+            </div>
+            <button 
+            onClick={() => setShowModal(false)} 
+            style={{ 
+                ...styles.closeBtn, 
+                color: 'rgba(255, 255, 255, 0.7)',
+                background: 'transparent',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+            ✕
+            </button>
+        </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, borderBottom: `1px solid ${theme.border}` }}>
-              <h2 style={{ ...styles.modalTitle, color: theme.text }}>Nuevo Producto</h2>
-              <button onClick={() => setShowModal(false)} style={{ ...styles.closeBtn, color: theme.textMuted }}>
-                ✕
-              </button>
+        {/* Cuerpo del Formulario */}
+        <form onSubmit={handleSubmit} style={{ ...styles.modalForm, padding: '24px' }}>
+            
+            <style>
+            {`
+                .custom-input {
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 8px;
+                border-width: 1px;
+                border-style: solid;
+                font-size: 1rem;
+                transition: border-color 0.2s, box-shadow 0.2s;
+                box-sizing: border-box;
+                }
+                .custom-input:focus {
+                outline: none;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+                }
+            `}
+            </style>
+
+            <div style={{...styles.formGroup, marginBottom: '20px'}}>
+            <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Nombre del producto</label>
+            <input
+                type="text"
+                className="custom-input"
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                required
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+                placeholder="Ej: Jabón Dove"
+            />
             </div>
 
-            <form onSubmit={handleSubmit} style={styles.modalForm}>
-              <div style={styles.formGroup}>
-                <label style={{ ...styles.label, color: theme.text }}>Nombre del producto</label>
+            <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
+            <div style={{...styles.formGroup, flex: 1}}>
+                <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Cantidad</label>
                 <input
-                  type="text"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  required
-                  style={{ ...styles.input, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
-                  placeholder="Ej: Jabón Dove"
+                type="number"
+                className="custom-input"
+                value={formData.cantidad}
+                onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })}
+                required
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+                placeholder="0"
                 />
-              </div>
+            </div>
 
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={{ ...styles.label, color: theme.text }}>Cantidad</label>
-                  <input
-                    type="number"
-                    value={formData.cantidad}
-                    onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })}
-                    required
-                    style={{ ...styles.input, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
-                    placeholder="0"
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={{ ...styles.label, color: theme.text }}>Stock mínimo</label>
-                  <input
-                    type="number"
-                    value={formData.stock_min}
-                    onChange={(e) => setFormData({ ...formData, stock_min: parseInt(e.target.value) || 0 })}
-                    required
-                    style={{ ...styles.input, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={{ ...styles.label, color: theme.text }}>Categoría</label>
+            <div style={{...styles.formGroup, flex: 1}}>
+                <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
                 <input
-                  type="text"
-                  value={formData.categoria}
-                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  required
-                  style={{ ...styles.input, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
-                  placeholder="Ej: limpieza, alimentos, bebidas"
+                type="number"
+                className="custom-input"
+                value={formData.stock_min}
+                onChange={(e) => setFormData({ ...formData, stock_min: parseInt(e.target.value) || 0 })}
+                required
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+                placeholder="0"
                 />
-              </div>
+            </div>
+            </div>
 
-              <div style={styles.formGroup}>
-                <label style={{ ...styles.label, color: theme.text }}>Notas (opcional)</label>
-                <textarea
-                  value={formData.notas}
-                  onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                  style={{ ...styles.input, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, minHeight: '80px', resize: 'vertical' }}
-                  placeholder="Detalles adicionales..."
-                />
-              </div>
+            <div style={{...styles.formGroup, marginBottom: '20px'}}>
+            <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
+            <input
+                type="text"
+                className="custom-input"
+                value={formData.categoria}
+                onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                required
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+                placeholder="Ej: limpieza, alimentos, bebidas"
+            />
+            </div>
 
-              <div style={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  style={{ ...styles.cancelBtn, backgroundColor: theme.cancelBtnBg, color: theme.text, border: `1px solid ${theme.border}` }}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" style={styles.submitBtn}>
-                  Guardar Producto
-                </button>
-              </div>
-            </form>
-          </div>
+            <div style={{...styles.formGroup, marginBottom: '24px'}}>
+            <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Notas (opcional)</label>
+            <textarea
+                className="custom-input"
+                value={formData.notas}
+                onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, minHeight: '100px', resize: 'vertical' }}
+                placeholder="Detalles adicionales..."
+            />
+            </div>
+
+            <div style={{ ...styles.modalActions, display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
+            <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                style={{ 
+                ...styles.cancelBtn, 
+                backgroundColor: theme.cancelBtnBg || 'transparent', 
+                color: theme.text, 
+                border: `1px solid ${theme.border}`,
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.cancelBtnBg || 'transparent'}
+            >
+                Cancelar
+            </button>
+            <button 
+                type="submit" 
+                style={{ 
+                ...styles.submitBtn,
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                padding: '10px 24px',
+                borderRadius: '8px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.3)',
+                transition: 'background-color 0.2s, transform 0.1s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+                onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+                onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+                Guardar Producto
+            </button>
+            </div>
+        </form>
         </div>
-      )}
     </div>
+    )}
+    
+    </div> /* <-- AQUÍ ESTÁ EL DIV QUE FALTABA CERRAR */
   );
 }
 
-// Temas - Soft Purple & Neutrals
 const lightTheme = {
   background: '#F7E7FA',
   text: '#2D2D2D',

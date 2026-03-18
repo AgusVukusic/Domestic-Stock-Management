@@ -8,7 +8,7 @@ from .db_utils import get_user_by_id
 security = HTTPBearer()
 
 # Función para obtener el usuario actual desde el token
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)): # <-- AÑADE async AQUÍ
     token = credentials.credentials
     
     try:
@@ -27,7 +27,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         )
     
     # Verifica que el usuario exista
-    user = get_user_by_id(user_id)
+    user = await get_user_by_id(user_id) # <-- AÑADE await AQUÍ
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

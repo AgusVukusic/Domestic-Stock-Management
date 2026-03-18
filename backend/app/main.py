@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import auth, products
+from .routes import auth, products, groups
 
 # Crear la aplicación FastAPI
 app = FastAPI(
@@ -18,9 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrar las rutas de autenticacion
+# Registrar las rutas de autenticacion y productos
 app.include_router(auth.router)
 app.include_router(products.router)
+app.include_router(groups.router) # Registramos las rutas de grupos
 
 # Endpoint de prueba
 @app.get("/")

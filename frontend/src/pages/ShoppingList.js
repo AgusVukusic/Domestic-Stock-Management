@@ -6,6 +6,12 @@ function ShoppingList() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  
+  // Nuevos estados para el modal de compra
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
 
@@ -35,7 +41,36 @@ function ShoppingList() {
     }
   };
 
+  // Abre el modal y prepara el producto
+  const handleOpenPurchaseModal = (product) => {
+    setSelectedProduct(product);
+    setPurchaseQuantity(1); // Por defecto sugerimos comprar 1
+    setShowPurchaseModal(true);
+  };
+
+  // Confirma la compra, sube el stock y lo quita de la lista
+  const handleConfirmPurchase = async (e) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    try {
+      // 1. Aumentamos el stock
+      await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity);
+      
+      // 2. Lo quitamos de la lista de compras
+      await productsAPI.removeFromShoppingList(selectedProduct._id);
+      
+      // 3. Cerramos modal y recargamos
+      setShowPurchaseModal(false);
+      setSelectedProduct(null);
+      loadShoppingList();
+    } catch (error) {
+      alert('Error al registrar la compra');
+    }
+  };
+
   const handleRemoveFromList = async (productId) => {
+    // Esta función la dejamos por si queremos quitar un producto sin comprarlo (opcional)
     try {
       await productsAPI.removeFromShoppingList(productId);
       loadShoppingList();
@@ -50,7 +85,6 @@ function ShoppingList() {
       return;
     }
 
-    // Agrupar productos por categoría
     const groupedByCategory = products.reduce((acc, product) => {
       const category = product.categoria || 'Sin categoría';
       if (!acc[category]) {
@@ -60,7 +94,6 @@ function ShoppingList() {
       return acc;
     }, {});
 
-    // Generar texto formateado
     let text = '🛒 LISTA DE COMPRAS\n';
     text += '━━━━━━━━━━━━━━━━━━━━\n\n';
 
@@ -84,11 +117,9 @@ function ShoppingList() {
     text += `Total: ${products.length} ${products.length === 1 ? 'producto' : 'productos'}\n`;
     text += `Generado: ${new Date().toLocaleDateString('es-AR')}\n`;
 
-    // Copiar al portapapeles
     navigator.clipboard.writeText(text).then(() => {
       alert('✓ Lista copiada al portapapeles!\nPuedes pegarla en WhatsApp, notas o donde quieras.');
     }).catch(() => {
-      // Fallback: crear textarea temporal
       const textarea = document.createElement('textarea');
       textarea.value = text;
       document.body.appendChild(textarea);
@@ -153,13 +184,11 @@ function ShoppingList() {
           </div>
         ) : (
           <>
-            {/* Header Info */}
             <div style={styles.headerInfo}>
               <h2 style={{ ...styles.listTitle, color: theme.text }}>Productos para comprar</h2>
               <div style={styles.badge}>{products.length} {products.length === 1 ? 'producto' : 'productos'}</div>
             </div>
 
-            {/* Products List */}
             <div style={styles.productList}>
               {products.map((product) => (
                 <div key={product._id} style={{ ...styles.productCard, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
@@ -194,7 +223,7 @@ function ShoppingList() {
 
                   <div style={styles.productActions}>
                     <button
-                      onClick={() => handleRemoveFromList(product._id)}
+                      onClick={() => handleOpenPurchaseModal(product)}
                       style={styles.removeBtn}
                     >
                       ✓ Comprado
@@ -204,7 +233,6 @@ function ShoppingList() {
               ))}
             </div>
 
-            {/* Export Button */}
             <div style={styles.exportSection}>
               <button onClick={handleExport} style={styles.exportBtn}>
                 📤 Exportar Lista
@@ -216,6 +244,117 @@ function ShoppingList() {
           </>
         )}
       </div>
+
+      {/* Modal de Registro de Compra */}
+      {showPurchaseModal && selectedProduct && (
+        <div style={styles.modalOverlay} onClick={() => setShowPurchaseModal(false)}>
+          <div 
+            style={{ 
+              ...styles.modal, 
+              backgroundColor: theme.cardBg,
+              padding: 0,
+              overflow: 'hidden',
+              borderRadius: '12px',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div 
+              style={{ 
+                ...styles.modalHeader, 
+                backgroundColor: '#8b5cf6',
+                padding: '20px 24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>🛒</span>
+                <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
+                  Registrar Compra
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowPurchaseModal(false)} 
+                style={styles.closeBtn}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmPurchase} style={{ padding: '24px' }}>
+              <p style={{ color: theme.text, marginBottom: '20px', fontSize: '1.05rem', lineHeight: '1.5' }}>
+                ¿Cuántas unidades de <strong>{selectedProduct.nombre}</strong> agregaste al inventario?
+              </p>
+              
+              <style>
+                {`
+                  .purchase-input {
+                    width: 100%;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    border-width: 1px;
+                    border-style: solid;
+                    font-size: 1.1rem;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                    box-sizing: border-box;
+                  }
+                  .purchase-input:focus {
+                    outline: none;
+                    border-color: #8b5cf6;
+                    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+                  }
+                `}
+              </style>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500', fontSize: '0.9rem' }}>
+                  Cantidad adquirida
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  className="purchase-input"
+                  value={purchaseQuantity}
+                  onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)}
+                  required
+                  style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowPurchaseModal(false)} 
+                  style={{ 
+                    ...styles.cancelBtn, 
+                    color: theme.text, 
+                    border: `1px solid ${theme.border}`
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  style={styles.submitBtn}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Confirmar Compra
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -227,7 +366,7 @@ const lightTheme = {
   textMuted: '#7A7A85',
   navbarBg: '#FFFFFF',
   cardBg: '#FFFFFF',
-  inputBg: '#F7E7FA',
+  inputBg: '#FFFFFF', // Corregido para que los inputs se vean blancos en modo claro
   border: '#e8d9eb',
 };
 
@@ -482,6 +621,61 @@ const styles = {
     fontSize: '16px',
     fontWeight: '600',
     boxShadow: '0 4px 16px rgba(140, 122, 230, 0.3)',
+  },
+  
+  // Nuevos estilos para el modal agregados aquí abajo
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(45, 45, 45, 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(4px)',
+  },
+  modal: {
+    borderRadius: '20px',
+    width: '90%',
+    maxWidth: '450px',
+    maxHeight: '90vh',
+    overflow: 'auto',
+  },
+  closeBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    transition: 'background-color 0.2s',
+  },
+  cancelBtn: {
+    padding: '10px 20px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '15px',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    backgroundColor: 'transparent',
+  },
+  submitBtn: {
+    backgroundColor: '#8b5cf6',
+    color: 'white',
+    border: 'none',
+    padding: '10px 24px',
+    borderRadius: '8px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.3)',
+    transition: 'transform 0.1s',
   },
 };
 

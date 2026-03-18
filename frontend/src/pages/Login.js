@@ -69,7 +69,7 @@ function Login() {
         {/* Logo/Header */}
         <div style={styles.header}>
           <div style={styles.logoContainer}>
-            <div style={styles.logo}>📦</div>
+            <div style={styles.logo}>🏡</div>
           </div>
           <h1 style={styles.title}>Stock App</h1>
           <p style={{ ...styles.subtitle, color: theme.textMuted }}>Gestiona tu inventario de forma sencilla</p>
