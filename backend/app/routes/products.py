@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from ..models.product import ProductInDB
@@ -9,7 +9,11 @@ from ..utils.product_db import (
     get_product_by_id,
     update_product,
     delete_product,
-    decrease_stock
+    decrease_stock,
+    increase_stock,
+    add_to_shopping_list,
+    remove_from_shopping_list,
+    get_shopping_list
 )
 from ..utils.auth_middleware import get_current_user
 
@@ -142,6 +146,21 @@ def decrease_product_stock(
     
     updated_product = decrease_stock(product_id, cantidad)
     return updated_product
+
+@router.put("/{product_id}/increase")
+async def increase_product_stock(
+    product_id: str,
+    cantidad: int = Query(1, ge=1),
+    current_user: dict = Depends(get_current_user)
+):
+    """Incrementar stock de un producto"""
+    try:
+        result = await increase_stock(product_id, cantidad, current_user["user_id"])
+        if result:
+            return {"message": "Stock incrementado exitosamente", "product": result}
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Agregar a lista de compras
 @router.put("/{product_id}/add-to-shopping-list")

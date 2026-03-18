@@ -1,72 +1,207 @@
-from ..config.database import db
-from ..models.product import ProductInDB
 from bson import ObjectId
-from typing import List, Optional
+from ..config.database import db
 
-products_collection = db["products"]
+def get_products_collection():
+    """Obtener la colección de productos"""
+    return db["products"]
 
-# Crear producto
-def create_product(
-    nombre: str,
-    cantidad: int,
-    categoria: str,
-    stock_min: int,
-    owner_type: str,
-    owner_id: str,
-    notas: Optional[str] = None,
-    en_lista_compras: bool = False
-) -> ProductInDB:
-    product_doc = {
-        "nombre": nombre,
-        "cantidad": cantidad,
-        "categoria": categoria,
-        "notas": notas,
-        "stock_min": stock_min,
-        "owner_type": owner_type,
-        "owner_id": owner_id,
-        "en_lista_compras": en_lista_compras
+def product_helper(product) -> dict:
+    """Convertir documento de MongoDB a dict"""
+    return {
+        "_id": str(product["_id"]),
+        "nombre": product["nombre"],
+        "cantidad": product["cantidad"],
+        "categoria": product["categoria"],
+        "notas": product.get("notas", ""),
+        "stock_min": product["stock_min"],
+        "owner_type": product["owner_type"],
+        "owner_id": product["owner_id"],
+        "en_lista_compras": product.get("en_lista_compras", False)
     }
-    result = products_collection.insert_one(product_doc)
-    product_doc["_id"] = str(result.inserted_id)
-    return ProductInDB(**product_doc)
 
-# Obtener productos por owner
-def get_products_by_owner(owner_type: str, owner_id: str) -> List[ProductInDB]:
-    products = products_collection.find({
-        "owner_type": owner_type,
-        "owner_id": owner_id
-    })
-    result = []
-    for product in products:
-        product["_id"] = str(product["_id"])
-        result.append(ProductInDB(**product))
-    return result
-
-# Obtener producto por ID
-def get_product_by_id(product_id: str) -> Optional[ProductInDB]:
-    product = products_collection.find_one({"_id": ObjectId(product_id)})
-    if product:
-        product["_id"] = str(product["_id"])
-        return ProductInDB(**product)
+async def create_product(product_data: dict):
+    """Crear un nuevo producto"""
+    products_collection = get_products_collection()
+    result = await products_collection.insert_one(product_data)
+    
+    if result.inserted_id:
+        new_product = await products_collection.find_one({"_id": result.inserted_id})
+        return product_helper(new_product)
     return None
 
-# Actualizar producto
-def update_product(product_id: str, update_data: dict) -> Optional[ProductInDB]:
-    products_collection.update_one(
-        {"_id": ObjectId(product_id)},
-        {"$set": update_data}
-    )
-    return get_product_by_id(product_id)
+async def get_user_products(user_id: str):
+    """Obtener todos los productos de un usuario"""
+    products_collection = get_products_collection()
+    products = []
+    
+    async for product in products_collection.find({"owner_id": user_id}):
+        products.append(product_helper(product))
+    
+    return products
 
-# Eliminar producto
-def delete_product(product_id: str) -> bool:
-    result = products_collection.delete_one({"_id": ObjectId(product_id)})
+async def get_product(product_id: str, user_id: str):
+    """Obtener un producto específico"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return None
+    
+    product = await products_collection.find_one({
+        "_id": obj_id,
+        "owner_id": user_id
+    })
+    
+    if product:
+        return product_helper(product)
+    return None
+
+async def update_product(product_id: str, product_data: dict, user_id: str):
+    """Actualizar un producto"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return None
+    
+    result = await products_collection.update_one(
+        {"_id": obj_id, "owner_id": user_id},
+        {"$set": product_data}
+    )
+    
+    if result.modified_count > 0:
+        updated_product = await products_collection.find_one({"_id": obj_id})
+        return product_helper(updated_product)
+    
+    return None
+
+async def delete_product(product_id: str, user_id: str):
+    """Eliminar un producto"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return False
+    
+    result = await products_collection.delete_one({
+        "_id": obj_id,
+        "owner_id": user_id
+    })
+    
     return result.deleted_count > 0
 
-# Decrementar stock
-def decrease_stock(product_id: str, cantidad: int = 1) -> Optional[ProductInDB]:
-    products_collection.update_one(
-        {"_id": ObjectId(product_id)},
-        {"$inc": {"cantidad": -cantidad}}
+async def decrease_stock(product_id: str, cantidad: int, user_id: str):
+    """Decrementar el stock de un producto"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return None
+    
+    product = await products_collection.find_one({
+        "_id": obj_id,
+        "owner_id": user_id
+    })
+    
+    if not product:
+        return None
+    
+    nueva_cantidad = max(0, product.get("cantidad", 0) - cantidad)
+    
+    result = await products_collection.update_one(
+        {"_id": obj_id},
+        {"$set": {"cantidad": nueva_cantidad}}
     )
-    return get_product_by_id(product_id)
+    
+    if result.modified_count > 0:
+        updated_product = await products_collection.find_one({"_id": obj_id})
+        return product_helper(updated_product)
+    
+    return None
+
+async def increase_stock(product_id: str, cantidad: int, user_id: str):
+    """Incrementar el stock de un producto"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return None
+    
+    product = await products_collection.find_one({
+        "_id": obj_id,
+        "owner_id": user_id
+    })
+    
+    if not product:
+        return None
+    
+    nueva_cantidad = product.get("cantidad", 0) + cantidad
+    
+    result = await products_collection.update_one(
+        {"_id": obj_id},
+        {"$set": {"cantidad": nueva_cantidad}}
+    )
+    
+    if result.modified_count > 0:
+        updated_product = await products_collection.find_one({"_id": obj_id})
+        return product_helper(updated_product)
+    
+    return None
+
+async def add_to_shopping_list(product_id: str, user_id: str):
+    """Agregar producto a la lista de compras"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return None
+    
+    result = await products_collection.update_one(
+        {"_id": obj_id, "owner_id": user_id},
+        {"$set": {"en_lista_compras": True}}
+    )
+    
+    if result.modified_count > 0:
+        updated_product = await products_collection.find_one({"_id": obj_id})
+        return product_helper(updated_product)
+    
+    return None
+
+async def remove_from_shopping_list(product_id: str, user_id: str):
+    """Quitar producto de la lista de compras"""
+    products_collection = get_products_collection()
+    
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return None
+    
+    result = await products_collection.update_one(
+        {"_id": obj_id, "owner_id": user_id},
+        {"$set": {"en_lista_compras": False}}
+    )
+    
+    if result.modified_count > 0:
+        updated_product = await products_collection.find_one({"_id": obj_id})
+        return product_helper(updated_product)
+    
+    return None
+
+async def get_shopping_list(user_id: str):
+    """Obtener productos en lista de compras"""
+    products_collection = get_products_collection()
+    products = []
+    
+    async for product in products_collection.find({
+        "owner_id": user_id,
+        "en_lista_compras": True
+    }):
+        products.append(product_helper(product))
+    
+    return products
