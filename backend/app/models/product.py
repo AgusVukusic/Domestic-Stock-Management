@@ -10,6 +10,7 @@ class Product(BaseModel):
     stock_min: int                  #stock minimo para alertas
     owner_type: str                 #indica si pertenece a un usuario o grupo
     owner_id: str                   #ID del dueño (user o group)
+    en_lista_compras: bool = False  #indica si el producto se encuentra en la lista de compras
 
 class ProductInDB(Product):
     id: Optional[str] = Field(None, alias="_id")
