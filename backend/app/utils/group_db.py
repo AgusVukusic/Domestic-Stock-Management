@@ -5,70 +5,76 @@ from ..config.database import db
 groups_collection = db["groups"]
 users_collection = db["users"]
 
-def group_helper(group) -> dict:
-    """Convierte el documento de MongoDB a un diccionario de Python"""
+# Convertimos esto a 'async def' para poder buscar en la DB de usuarios
+async def group_helper(group) -> dict:
+    """Convierte el documento de MongoDB a un diccionario de Python y busca usernames"""
+    member_ids = group.get("members", [])
+    members_detail = []
+    
+    # Buscar el username de cada miembro en la colección de usuarios
+    for m_id in member_ids:
+        try:
+            user = await users_collection.find_one({"_id": ObjectId(m_id)})
+            if user:
+                members_detail.append({
+                    "id": str(user["_id"]), 
+                    "username": user["username"]
+                })
+        except:
+            continue
+
     return {
         "_id": str(group["_id"]),
         "nombre": group["nombre"],
         "created_by": group["created_by"],
-        "members": group.get("members", []),
+        "members": member_ids,
+        "members_detail": members_detail, # <-- Agregamos el detalle aquí
         "created_at": group.get("created_at")
     }
 
 async def create_group(nombre: str, user_id: str):
-    """Crea un grupo y añade al creador como el primer miembro"""
     group_data = {
         "nombre": nombre,
         "created_by": user_id,
-        "members": [user_id], # El creador se une automáticamente
+        "members": [user_id],
         "created_at": datetime.utcnow()
     }
     result = await groups_collection.insert_one(group_data)
     if result.inserted_id:
         new_group = await groups_collection.find_one({"_id": result.inserted_id})
-        return group_helper(new_group)
+        return await group_helper(new_group) # Añadido await
     return None
 
 async def get_user_groups(user_id: str):
-    """Obtiene todos los grupos a los que pertenece un usuario"""
     groups = []
-    # Buscamos grupos donde el user_id esté dentro del array 'members'
     async for group in groups_collection.find({"members": user_id}):
-        groups.append(group_helper(group))
+        groups.append(await group_helper(group)) # Añadido await
     return groups
 
 async def add_member_by_username(group_id: str, username_to_add: str, current_user_id: str):
-    """Agrega un nuevo miembro al grupo buscando por su nombre de usuario"""
     try:
         obj_id = ObjectId(group_id)
     except:
         return None, "ID de grupo inválido"
 
-    # 1. Verificar si el usuario que queremos agregar existe en la base de datos
     user_to_add = await users_collection.find_one({"username": username_to_add})
     if not user_to_add:
         return None, "El usuario no existe"
 
     user_id_to_add = str(user_to_add["_id"])
-
-    # 2. Verificar que el grupo existe
     group = await groups_collection.find_one({"_id": obj_id})
+    
     if not group:
         return None, "Grupo no encontrado"
-
-    # 3. Verificar que el usuario que hace la petición ya es miembro del grupo
     if current_user_id not in group.get("members", []):
         return None, "No tienes permiso para agregar miembros a este grupo"
-
-    # 4. Verificar que el usuario no esté ya en el grupo
     if user_id_to_add in group.get("members", []):
         return None, "El usuario ya es miembro del grupo"
 
-    # 5. Agregar el ID del nuevo usuario al array de miembros
     await groups_collection.update_one(
         {"_id": obj_id},
         {"$push": {"members": user_id_to_add}}
     )
 
     updated_group = await groups_collection.find_one({"_id": obj_id})
-    return group_helper(updated_group), None
+    return await group_helper(updated_group), None

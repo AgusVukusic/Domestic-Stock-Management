@@ -19,13 +19,15 @@ from ..utils.auth_middleware import get_current_user
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-# Modelos de request
+# Modelos de request actualizados para soportar grupos
 class ProductCreate(BaseModel):
     nombre: str
     cantidad: int
     categoria: str
     notas: Optional[str] = None
     stock_min: int
+    owner_type: Optional[str] = "user"  # Por defecto es personal
+    owner_id: Optional[str] = None      # Si es group, acá viene el ID del grupo
 
 class ProductUpdate(BaseModel):
     nombre: Optional[str] = None
@@ -40,15 +42,29 @@ async def create_new_product(
     product: ProductCreate,
     current_user: UserInDB = Depends(get_current_user)
 ):
-    # Armamos el diccionario que espera la base de datos
+    owner_type = product.owner_type
+    owner_id = product.owner_id if product.owner_id else current_user.id
+
+    # Si intenta crear un producto para un grupo, verificamos por seguridad que pertenezca a él
+    if owner_type == "group":
+        from ..utils.group_db import get_user_groups
+        user_groups = await get_user_groups(current_user.id)
+        group_ids = [g["_id"] for g in user_groups]
+        if owner_id not in group_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No puedes crear productos en un grupo al que no perteneces"
+            )
+
     product_data = {
         "nombre": product.nombre,
         "cantidad": product.cantidad,
         "categoria": product.categoria,
         "stock_min": product.stock_min,
-        "owner_type": "user",
-        "owner_id": current_user.id,
-        "notas": product.notas
+        "owner_type": owner_type,
+        "owner_id": owner_id,
+        "notas": product.notas,
+        "en_lista_compras": False
     }
     
     new_product = await create_product(product_data)
@@ -68,11 +84,7 @@ async def get_single_product(
 ):
     product = await get_product(product_id, current_user.id)
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Producto no encontrado o no tienes permiso"
-        )
-    
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permiso")
     return product
 
 # Actualizar producto
@@ -86,11 +98,7 @@ async def update_existing_product(
     updated_product = await update_product(product_id, update_data, current_user.id)
     
     if not updated_product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Producto no encontrado o sin permisos"
-        )
-        
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
     return updated_product
 
 # Eliminar producto
@@ -101,11 +109,7 @@ async def delete_existing_product(
 ):
     success = await delete_product(product_id, current_user.id)
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Producto no encontrado o no tienes permiso"
-        )
-    
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
     return {"message": "Producto eliminado correctamente"}
 
 # Decrementar stock (usar un producto)
@@ -117,11 +121,7 @@ async def decrease_product_stock(
 ):
     updated_product = await decrease_stock(product_id, cantidad, current_user.id)
     if not updated_product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Producto no encontrado o sin permisos"
-        )
-    
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
     return updated_product
 
 # Incrementar stock
@@ -134,7 +134,7 @@ async def increase_product_stock(
     try:
         result = await increase_stock(product_id, cantidad, current_user.id)
         if result:
-            return {"message": "Stock incrementado exitosamente", "product": result}
+            return {"message": "Stock incrementado", "product": result}
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -147,10 +147,7 @@ async def add_product_to_shopping_list(
 ):
     updated_product = await add_to_shopping_list(product_id, current_user.id)
     if not updated_product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Producto no encontrado o sin permisos"
-        )
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
     return updated_product
 
 # Quitar de lista de compras
@@ -161,10 +158,7 @@ async def remove_product_from_shopping_list(
 ):
     updated_product = await remove_from_shopping_list(product_id, current_user.id)
     if not updated_product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Producto no encontrado o sin permisos"
-        )
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
     return updated_product
 
 # Ver lista de compras

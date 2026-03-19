@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 function RegisterPurchase() {
   const [products, setProducts] = useState([]);
@@ -64,9 +65,9 @@ function RegisterPurchase() {
       loadAllProducts(); // Recargar para ver el stock actualizado
       
       // Pequeño feedback visual (opcional)
-      alert(`¡Se sumaron ${purchaseQuantity} unidades de ${selectedProduct.nombre}!`);
+      toast.success(`¡Se sumaron ${purchaseQuantity} unidades de ${selectedProduct.nombre}!`);
     } catch (error) {
-      alert('Error al registrar la compra');
+      toast.error('Error al registrar la compra');
     }
   };
 

@@ -4,6 +4,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ShoppingList from './pages/ShoppingList';
 import RegisterPurchase from './pages/RegisterPurchase';
+import FamilyGroups from './pages/FamilyGroups';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   // Verificar si el usuario está autenticado
@@ -18,6 +20,18 @@ function App() {
 
   return (
     <Router>
+      {/* Toaster para notificaciones */}
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+          },
+        }} 
+      />
+
       <Routes>
         <Route path="/login" element={<Login />} />
         
@@ -47,6 +61,16 @@ function App() {
           element={
             <PrivateRoute>
               <RegisterPurchase />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Ruta de los grupos familiares */}
+        <Route
+          path="/groups"
+          element={
+            <PrivateRoute>
+              <FamilyGroups />
             </PrivateRoute>
           }
         />

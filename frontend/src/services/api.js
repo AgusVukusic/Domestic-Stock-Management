@@ -57,6 +57,16 @@ export const productsAPI = {
     api.delete(`/products/${id}/remove-from-shopping-list`),
   
   getShoppingList: () => api.get('/products/shopping-list/view'),
+  
+};
+
+export const groupsAPI = {
+  getAll: () => api.get('/groups/'),
+  
+  create: (nombre) => api.post('/groups/', { nombre }),
+  
+  addMember: (groupId, username) => 
+    api.post(`/groups/${groupId}/members`, { username }),
 };
 
 export default api;
