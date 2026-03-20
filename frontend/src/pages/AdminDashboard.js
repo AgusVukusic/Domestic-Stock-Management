@@ -8,11 +8,15 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   
-  // Nuevos estados para el Modal de Detalles
+  // Estados para el Modal de Detalles
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userDetails, setUserDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+  // NUEVO: Estados para el Modal de Eliminación
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
@@ -36,7 +40,6 @@ function AdminDashboard() {
     }
   };
 
-  // Función para buscar los detalles al hacer clic
   const handleViewDetails = async (user) => {
     setSelectedUser(user.username);
     setShowModal(true);
@@ -48,6 +51,28 @@ function AdminDashboard() {
       toast.error('Error al cargar los detalles del usuario');
     } finally {
       setLoadingDetails(false);
+    }
+  };
+
+  // NUEVO: Función que abre el modal de confirmación
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setShowDeleteConfirm(true);
+  };
+
+  // NUEVO: Función que realmente ejecuta la eliminación en el backend
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    
+    const toastId = toast.loading('Eliminando usuario...');
+    try {
+      await api.delete(`/admin/users/${userToDelete.id || userToDelete._id}`);
+      toast.success('Usuario eliminado exitosamente', { id: toastId });
+      setShowDeleteConfirm(false);
+      setUserToDelete(null);
+      fetchUsers(); // Recarga la tabla
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al eliminar el usuario', { id: toastId });
     }
   };
 
@@ -125,6 +150,7 @@ function AdminDashboard() {
                         👁️ Detalles
                       </button>
                       <button 
+                        onClick={() => handleDeleteClick(user)}
                         style={{ ...styles.actionBtnDelete, opacity: user.rol === 'admin' ? 0.5 : 1, cursor: user.rol === 'admin' ? 'not-allowed' : 'pointer' }}
                         disabled={user.rol === 'admin'}
                       >
@@ -181,6 +207,40 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* NUEVO: Modal de Confirmación para Eliminar */}
+      {showDeleteConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ ...styles.modalHeader, background: '#e74c3c' }}>
+              <h2 style={{ margin: 0, color: 'white', fontSize: '18px' }}>⚠️ Confirmar Eliminación</h2>
+              <button onClick={() => setShowDeleteConfirm(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <p style={{ color: theme.text, fontSize: '16px', marginBottom: '8px' }}>
+                ¿Estás seguro de que deseas eliminar a <strong>{userToDelete?.username}</strong>?
+              </p>
+              <p style={{ color: theme.textMuted, fontSize: '14px', marginBottom: '24px' }}>
+                Esta acción no se puede deshacer.
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)} 
+                  style={{ ...styles.cancelBtn, backgroundColor: theme.inputBg, color: theme.text, border: `2px solid ${theme.border}` }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmDelete} 
+                  style={{ ...styles.cancelBtn, background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
+                >
+                  Sí, Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -217,7 +277,8 @@ const styles = {
   modal: { borderRadius: '16px', width: '90%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' },
   modalHeader: { background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   closeBtn: { background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' },
-  groupCard: { padding: '15px', borderRadius: '12px', marginBottom: '15px', transition: 'all 0.3s ease' }
+  groupCard: { padding: '15px', borderRadius: '12px', marginBottom: '15px', transition: 'all 0.3s ease' },
+  cancelBtn: { flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', transition: 'all 0.3s ease' }
 };
 
 export default AdminDashboard;

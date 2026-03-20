@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from ..models.user import UserInDB
 from ..utils.auth_middleware import get_current_user
 from ..config.database import db
+from bson import ObjectId
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -76,3 +77,26 @@ async def get_user_details(username: str, current_admin: UserInDB = Depends(get_
         })
         
     return result
+
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_admin: UserInDB = Depends(get_current_admin)):
+    # 1. Evitar que el admin se borre a sí mismo
+    if str(current_admin.id) == user_id:
+        raise HTTPException(status_code=400, detail="No puedes eliminar tu propia cuenta")
+
+    # 2. Buscar el usuario a eliminar
+    user_to_delete = await db["users"].find_one({"_id": ObjectId(user_id)})
+    if not user_to_delete:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # 3. Evitar eliminar a otros administradores
+    if user_to_delete.get("rol") == "admin":
+        raise HTTPException(status_code=403, detail="No puedes eliminar a otro administrador")
+
+    # 4. Eliminar el usuario de la base de datos
+    result = await db["users"].delete_one({"_id": ObjectId(user_id)})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=500, detail="Error al eliminar el usuario")
+
+    return {"message": "Usuario eliminado exitosamente"}
