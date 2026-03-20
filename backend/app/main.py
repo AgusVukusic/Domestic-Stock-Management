@@ -12,10 +12,7 @@ app = FastAPI(
 # Configurar CORS (para que el frontend pueda acceder a la API)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://domestic-stock-management.vercel.app"
-    ],
+    allow_origins=["*"],  # En producción, especificar dominios
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
