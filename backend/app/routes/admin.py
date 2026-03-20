@@ -37,3 +37,42 @@ async def get_system_stats(admin: UserInDB = Depends(get_current_admin)):
         "total_groups": total_groups,
         "total_products": total_products
     }
+    
+@router.get("/users/{username}/details")
+async def get_user_details(username: str, current_admin: UserInDB = Depends(get_current_admin)):
+    # 1. Primero, buscar el ID del usuario a partir de su username
+    user = await db["users"].find_one({"username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+    user_id = str(user["_id"])
+    
+    # 2. Buscar grupos donde el ID de este usuario está en la lista de 'members'
+    groups_cursor = db["groups"].find({"members": user_id})
+    groups = await groups_cursor.to_list(length=100)
+
+    result = []
+    for group in groups:
+        group_id = str(group["_id"])
+        
+        # 3. Buscar productos que pertenecen a este grupo
+        products_cursor = db["products"].find({"owner_id": group_id})
+        products = await products_cursor.to_list(length=1000)
+        
+        # Formatear la info de los productos
+        formatted_products = [
+            {
+                "nombre": p["nombre"],
+                "cantidad": p.get("cantidad", 0),
+                "categoria": p.get("categoria", ""),
+            }
+            for p in products
+        ]
+        
+        result.append({
+            "group_id": group_id,
+            "group_name": group["nombre"],
+            "products": formatted_products
+        })
+        
+    return result
