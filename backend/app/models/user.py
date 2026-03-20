@@ -9,3 +9,4 @@ class User(BaseModel):
 #Version del usuario cuando se guarda en la BDD (Incluye el id)
 class UserInDB(User):
     id: Optional[str] = Field(None, alias="_id")  # MongoDB usa _id, nosotros lo mapeamos a id
+    rol: str = "user"
