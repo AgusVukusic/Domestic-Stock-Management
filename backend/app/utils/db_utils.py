@@ -8,7 +8,8 @@ users_collection = db["users"]
 async def create_user(username: str, hashed_password: str) -> UserInDB:
     user_doc = {
         "username": username,
-        "password": hashed_password
+        "password": hashed_password,
+        "rol": "user"
     }
     result = await users_collection.insert_one(user_doc)
     user_doc["_id"] = str(result.inserted_id)
