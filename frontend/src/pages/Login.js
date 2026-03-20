@@ -40,8 +40,14 @@ function Login() {
       localStorage.setItem('token', response.data.access_token);
       localStorage.setItem('user_id', response.data.user_id);
       localStorage.setItem('username', response.data.username);
+      localStorage.setItem('rol', response.data.rol); // Guardamos el rol
 
-      navigate('/dashboard');
+      // Redirección condicional según el rol
+      if (response.data.rol === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(
         err.response?.data?.detail || 'Error al ' + (isLogin ? 'iniciar sesión' : 'registrarse')
