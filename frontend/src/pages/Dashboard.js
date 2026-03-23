@@ -364,42 +364,37 @@ function Dashboard() {
         ) : (
           displayedProducts.map((product) => (
             <div key={product._id} style={{ ...styles.card, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }} className="product-card">
-              <div style={styles.cardHeaderGradient}>
-                <h5 style={styles.cardHeaderTitle}>{product.nombre}</h5>
-                <span style={styles.categoryBadge}>{product.categoria}</span>
-              </div>
-
-              <div style={styles.cardBody}>
-                <div style={styles.stockGrid}>
-                  <div style={styles.stockItem}>
-                    <span style={{ ...styles.stockLabel, color: theme.textMuted }}>Stock Actual</span>
-                    <span style={{ ...styles.stockBadge, ...getStockBadgeStyle(product.cantidad, product.stock_min) }}>
-                      {product.cantidad}
-                    </span>
-                  </div>
+              
+              {/* Lado izquierdo: Información compacta */}
+              <div style={styles.cardInfo}>
+                <div style={styles.cardHeaderRow}>
+                  <h5 style={{ ...styles.cardHeaderTitle, color: theme.text }}>{product.nombre}</h5>
+                  {product.cantidad <= product.stock_min && (
+                    <span style={styles.alertDot}>{product.cantidad === 0 ? '🔴' : '🟡'}</span>
+                  )}
+                </div>
+                
+                <div style={styles.cardMetaRow}>
+                  <span style={styles.categoryBadge}>{product.categoria}</span>
+                  <span style={{ ...styles.stockBadge, ...getStockBadgeStyle(product.cantidad, product.stock_min) }}>
+                    Stock: {product.cantidad}
+                  </span>
                 </div>
 
-                {product.cantidad <= product.stock_min && (
-                  <div style={{ ...styles.alertBox, ...(product.cantidad === 0 ? styles.alertBoxDanger : {}) }}>
-                    ⚠️ {product.cantidad === 0 ? 'Sin stock' : 'Stock bajo'}
-                  </div>
-                )}
-
                 {product.notas && (
-                  <div style={{ ...styles.notes, color: theme.textMuted }}>
-                    <span style={{ ...styles.notesLabel, color: theme.text }}>Notas:</span> {product.notas}
-                  </div>
+                  <div style={{ ...styles.notes, color: theme.textMuted }}>{product.notas}</div>
                 )}
               </div>
 
+              {/* Lado derecho: Botones cuadrados nativos */}
               <div style={styles.cardActions}>
-                <button onClick={() => handleDecrease(product._id, product.nombre)} disabled={product.cantidad === 0} style={{ ...styles.actionBtn, ...styles.actionBtnUse, opacity: product.cantidad === 0 ? 0.5 : 1, cursor: product.cantidad === 0 ? 'not-allowed' : 'pointer' }}>
+                <button onClick={() => handleDecrease(product._id, product.nombre)} disabled={product.cantidad === 0} style={{ ...styles.actionBtn, ...styles.actionBtnUse, opacity: product.cantidad === 0 ? 0.5 : 1 }}>
                   ➖
                 </button>
-                <button onClick={() => toggleShoppingList(product)} style={{ ...styles.actionBtn, ...(product.en_lista_compras ? styles.actionBtnInList : { ...styles.actionBtnAddList, backgroundColor: theme.inputBg, color: theme.text, border: `2px solid ${theme.border}` }) }}>
+                <button onClick={() => toggleShoppingList(product)} style={{ ...styles.actionBtn, ...(product.en_lista_compras ? styles.actionBtnInList : { backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }) }}>
                   {product.en_lista_compras ? '✓' : '🛒'}
                 </button>
-                <button onClick={() => openEditModal(product)} style={{ ...styles.actionBtn, backgroundColor: theme.inputBg, color: theme.text, border: `2px solid ${theme.border}` }}>
+                <button onClick={() => openEditModal(product)} style={{ ...styles.actionBtn, backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }}>
                   ✏️
                 </button>
                 <button onClick={() => handleDelete(product._id)} style={{ ...styles.actionBtn, ...styles.actionBtnDelete }}>
@@ -542,26 +537,22 @@ const styles = {
   successActionBtn: { padding: '12px 28px', background: '#8C7AE6', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)', transition: 'all 0.3s ease' },
   btnIcon: { fontSize: '18px' },
   badge: { backgroundColor: 'rgba(255,255,255,0.3)', padding: '2px 10px', borderRadius: '12px', fontSize: '13px', fontWeight: '700', marginLeft: '4px' },
-  productGrid: { maxWidth: '1400px', margin: '0 auto', padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' },
-  card: { borderRadius: '16px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)', transition: 'all 0.3s ease' },
-  cardHeaderGradient: { background: 'linear-gradient(135deg, #8C7AE6 0%, #C7C8F4 100%)', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  cardHeaderTitle: { margin: 0, color: 'white', fontSize: '18px', fontWeight: '600' },
-  categoryBadge: { backgroundColor: 'rgba(255,255,255,0.25)', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', textTransform: 'capitalize', backdropFilter: 'blur(10px)' },
-  cardBody: { padding: '20px' },
-  stockGrid: { display: 'flex', marginBottom: '15px' },
-  stockItem: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  stockLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' },
-  stockBadge: { fontSize: '24px', fontWeight: '700', padding: '8px 16px', borderRadius: '10px', display: 'inline-block', boxShadow: '0 2px 6px rgba(0,0,0,0.08)' },
-  alertBox: { backgroundColor: '#fff3cd', color: '#856404', padding: '10px 15px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', marginBottom: '10px', border: '1px solid #ffeeba' },
-  alertBoxDanger: { backgroundColor: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a' },
-  notes: { fontSize: '13px', lineHeight: '1.6', marginTop: '10px' },
-  notesLabel: { fontWeight: '600' },
-  cardActions: { display: 'grid', gridTemplateColumns: '1fr 60px 60px 60px', gap: '8px', padding: '0 20px 20px' },
-  actionBtn: { padding: '10px', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'all 0.3s ease', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)' },
+  productGrid: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', flexDirection: 'column', gap: '12px' },
+  card: { borderRadius: '16px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)', transition: 'all 0.3s ease' },
+  cardInfo: { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 },
+  cardHeaderRow: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' },
+  cardHeaderTitle: { margin: 0, fontSize: '16px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  alertDot: { fontSize: '12px' },
+  cardMetaRow: { display: 'flex', alignItems: 'center', gap: '8px' },
+  categoryBadge: { backgroundColor: '#F7E7FA', color: '#8C7AE6', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', textTransform: 'capitalize' },
+  stockBadge: { fontSize: '11px', fontWeight: '700', padding: '4px 8px', borderRadius: '6px' },
+  notes: { fontSize: '12px', marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  cardActions: { display: 'grid', gridTemplateColumns: 'repeat(2, 36px)', gap: '8px' },
+  actionBtn: { width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '16px', transition: 'all 0.2s ease' },
   actionBtnUse: { background: '#8C7AE6', color: 'white' },
   actionBtnAddList: { backgroundColor: '#F7E7FA', color: '#2D2D2D' },
   actionBtnInList: { background: '#C7C8F4', color: '#2D2D2D' },
-  actionBtnDelete: { background: '#e74c3c', color: 'white' },
+  actionBtnDelete: { background: '#ffebee', color: '#c62828' },
   emptyState: { gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)' },
   emptyIcon: { fontSize: '80px', marginBottom: '20px' },
   emptyTitle: { fontSize: '24px', marginBottom: '10px', fontWeight: '600' },
