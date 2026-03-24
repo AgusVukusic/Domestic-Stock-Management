@@ -67,6 +67,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     navigate('/login');
   };
 
