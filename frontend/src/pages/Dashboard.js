@@ -433,21 +433,49 @@ function Dashboard() {
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
-              <input 
-                type="text" 
-                list="categorias-existentes" 
-                className="custom-input" 
-                value={formData.categoria} 
-                onChange={(e) => setFormData({ ...formData, categoria: e.target.value.toLowerCase() })} 
-                required 
-                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
-                placeholder="Ej: limpieza, alimentos" 
-              />
-              <datalist id="categorias-existentes">
-                {groupCategories.map(cat => (
-                  <option key={cat} value={cat} />
-                ))}
-              </datalist>
+              
+              {/* Contenedor del Input Compuesto */}
+              <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: '8px', overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
+                
+                {/* 1. Campo para escribir a mano */}
+                <input 
+                  type="text" 
+                  value={formData.categoria} 
+                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value.toLowerCase() })} 
+                  required 
+                  style={{ flex: 1, border: 'none', padding: '10px 12px', fontSize: '1rem', backgroundColor: 'transparent', color: theme.text, outline: 'none', width: '100%' }} 
+                  placeholder="Ej: limpieza, alimentos" 
+                />
+                
+                {/* 2. Línea divisora */}
+                <div style={{ width: '1px', backgroundColor: theme.border, margin: '6px 0' }}></div>
+                
+                {/* 3. Dropdown con la flechita violeta */}
+                <select 
+                  value="" 
+                  onChange={(e) => {
+                    if (e.target.value) setFormData({ ...formData, categoria: e.target.value });
+                  }} 
+                  style={{ 
+                    width: '45px', 
+                    border: 'none', 
+                    backgroundColor: 'transparent', 
+                    color: 'transparent', 
+                    outline: 'none', 
+                    cursor: 'pointer', 
+                    appearance: 'none', 
+                    backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b5cf6%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', 
+                    backgroundRepeat: 'no-repeat', 
+                    backgroundPosition: 'center', 
+                    backgroundSize: '12px auto' 
+                  }}
+                >
+                  <option value="" disabled></option>
+                  {groupCategories.map(cat => (
+                    <option key={cat} value={cat} style={{ color: '#000' }}>{cat}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '24px'}}>
@@ -511,21 +539,49 @@ function Dashboard() {
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
-              <input 
-                type="text" 
-                list="categorias-existentes-edit" 
-                className="custom-input" 
-                value={editingProduct.categoria} 
-                onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} 
-                required 
-                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
-                placeholder="Ej: limpieza, alimentos" 
-              />
-              <datalist id="categorias-existentes-edit">
-                {groupCategories.map(cat => (
-                  <option key={cat} value={cat} />
-                ))}
-              </datalist>
+              
+              {/* Contenedor del Input Compuesto */}
+              <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: '8px', overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
+                
+                {/* 1. Campo para escribir a mano */}
+                <input 
+                  type="text" 
+                  value={editingProduct.categoria} 
+                  onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} 
+                  required 
+                  style={{ flex: 1, border: 'none', padding: '10px 12px', fontSize: '1rem', backgroundColor: 'transparent', color: theme.text, outline: 'none', width: '100%' }} 
+                  placeholder="Ej: limpieza, alimentos" 
+                />
+                
+                {/* 2. Línea divisora */}
+                <div style={{ width: '1px', backgroundColor: theme.border, margin: '6px 0' }}></div>
+                
+                {/* 3. Dropdown con la flechita violeta */}
+                <select 
+                  value="" 
+                  onChange={(e) => {
+                    if (e.target.value) setEditingProduct({ ...editingProduct, categoria: e.target.value });
+                  }} 
+                  style={{ 
+                    width: '45px', 
+                    border: 'none', 
+                    backgroundColor: 'transparent', 
+                    color: 'transparent', 
+                    outline: 'none', 
+                    cursor: 'pointer', 
+                    appearance: 'none', 
+                    backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b5cf6%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', 
+                    backgroundRepeat: 'no-repeat', 
+                    backgroundPosition: 'center', 
+                    backgroundSize: '12px auto' 
+                  }}
+                >
+                  <option value="" disabled></option>
+                  {groupCategories.map(cat => (
+                    <option key={cat} value={cat} style={{ color: '#000' }}>{cat}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '24px'}}>
