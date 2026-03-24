@@ -17,7 +17,7 @@ function Dashboard() {
   const [activeGroup, setActiveGroup] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
-  const [sortBy, setSortBy] = useState(''); // <-- estado para ordenar
+  const [sortBy, setSortBy] = useState('');
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -163,11 +163,9 @@ function Dashboard() {
 
   const theme = darkMode ? darkTheme : lightTheme;
 
-  // 1. Filtrar por Grupo
   let displayedProducts = products.filter(p => p.owner_id === activeGroup);
   const groupCategories = [...new Set(displayedProducts.map(p => p.categoria))].filter(Boolean).sort();
 
-  // 2. Filtrar por Búsqueda
   if (searchTerm) {
     displayedProducts = displayedProducts.filter(p => 
       p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -175,12 +173,10 @@ function Dashboard() {
     );
   }
 
-  // 3. Filtrar por Categoría
   if (activeCategory) {
     displayedProducts = displayedProducts.filter(p => p.categoria === activeCategory);
   }
 
-  // 4. Ordenar Productos SÓLO CUMPLIENDO RF-PROD-09
   if (sortBy === 'name-asc') {
     displayedProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
   } else if (sortBy === 'name-desc') {
@@ -220,7 +216,7 @@ function Dashboard() {
               {darkMode ? '☀️' : '🌙'}
             </button>
             <span style={{ ...styles.username, color: theme.textMuted }}>👤 {username}</span>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Cerrar Sesión</button>
+            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
@@ -254,7 +250,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* TÍTULO Y SELECTOR INTEGRADO */}
       <div style={{ maxWidth: '1400px', margin: '0 auto 20px', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px', padding: '0 15px' }}>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: theme.text }}>
@@ -281,7 +276,6 @@ function Dashboard() {
           </select>
         </div>
 
-        {/* CONTROLES (Buscador y Categoría) */}
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
         <div style={styles.controlsContainer}>
           <div style={styles.searchContainer}>
@@ -291,42 +285,43 @@ function Dashboard() {
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+              style={{ ...styles.searchInput, width: '100%', backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
             />
-        </div>
+          </div>
 
+          <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
               style={{
-                padding: '10px 16px', borderRadius: '10px', border: `2px solid ${theme.border}`,
+                flex: 1, padding: '10px 12px', borderRadius: '10px', border: `2px solid ${theme.border}`,
                 backgroundColor: theme.inputBg, color: theme.text, outline: 'none', cursor: 'pointer',
-                minWidth: '200px', boxSizing: 'border-box'
+                boxSizing: 'border-box'
               }}
             >
-              <option value="">🏷️ Todas las categorías</option>
+              <option value="">🏷️ Todas</option>
               {groupCategories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
 
-            {/* NUEVO: Selector de Ordenamiento */}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={{
-                padding: '10px 16px', borderRadius: '10px', border: `2px solid ${theme.border}`,
+                flex: 1, padding: '10px 12px', borderRadius: '10px', border: `2px solid ${theme.border}`,
                 backgroundColor: theme.inputBg, color: theme.text, outline: 'none', cursor: 'pointer',
-                minWidth: '200px', boxSizing: 'border-box'
+                boxSizing: 'border-box'
               }}
             >
-              <option value="">↕️ Ordenar por...</option>
-              <option value="name-asc">🔤 Nombre (A-Z)</option>
-              <option value="name-desc">🔠 Nombre (Z-A)</option>
-              <option value="stock-asc">📉 Stock (Menor a Mayor)</option>
-              <option value="stock-desc">📈 Stock (Mayor a Menor)</option>
+              <option value="">↕️ Ordenar</option>
+              <option value="name-asc">🔤 A-Z</option>
+              <option value="name-desc">🔠 Z-A</option>
+              <option value="stock-asc">📉 Stock (-)</option>
+              <option value="stock-desc">📈 Stock (+)</option>
             </select>
           </div>
+        </div>
         )}
       </div>
 
@@ -361,8 +356,6 @@ function Dashboard() {
         ) : (
           displayedProducts.map((product) => (
             <div key={product._id} style={{ ...styles.card, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }} className="product-card">
-              
-              {/* Lado izquierdo: Información compacta */}
               <div style={styles.cardInfo}>
                 <div style={styles.cardHeaderRow}>
                   <h5 style={{ ...styles.cardHeaderTitle, color: theme.text }}>{product.nombre}</h5>
@@ -383,7 +376,6 @@ function Dashboard() {
                 )}
               </div>
 
-              {/* Lado derecho: Botones cuadrados nativos */}
               <div style={styles.cardActions}>
                 <button onClick={() => handleDecrease(product._id, product.nombre)} disabled={product.cantidad === 0} style={{ ...styles.actionBtn, ...styles.actionBtnUse, opacity: product.cantidad === 0 ? 0.5 : 1 }}>
                   ➖
@@ -481,11 +473,11 @@ function Dashboard() {
             <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Cantidad</label>
-                  <input type="number" className="custom-input" value={editingProduct.cantidad} onChange={(e) => setEditingProduct({ ...editingProduct, cantidad: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input type="number" className="custom-input" value={editingProduct.cantidad} onFocus={(e) => e.target.select()} onChange={(e) => setEditingProduct({ ...editingProduct, cantidad: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
               </div>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
-                  <input type="number" className="custom-input" value={editingProduct.stock_min} onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input type="number" className="custom-input" value={editingProduct.stock_min} onFocus={(e) => e.target.select()} onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
               </div>
             </div>
 
@@ -519,16 +511,14 @@ const styles = {
   loadingContainer: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' },
   spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8C7AE6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
   loadingText: { marginTop: '20px', fontSize: '18px' },
-  // --- NAVBAR ---
   navbar: { padding: '15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
   navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navbarLeft: { display: 'flex', alignItems: 'center' },
   logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
   navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
-  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' },
-  username: { fontSize: '13px', fontWeight: '600', display: 'none' }, // Ocultamos tu nombre en el celular para hacer más espacio
-  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },actionsContainer: { maxWidth: '1400px', margin: '0 auto 40px', padding: '0 20px' },
-  // --- BOTONES PRINCIPALES ---
+  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
+  username: { fontSize: '13px', fontWeight: '600', display: 'none' },
+  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
   actionsContainer: { maxWidth: '1400px', margin: '0 auto 20px', padding: '0 15px' },
   actionsCard: { padding: '15px', borderRadius: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)', transition: 'all 0.3s ease' },
   primaryActionBtn: { padding: '12px 6px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
@@ -536,6 +526,11 @@ const styles = {
   successActionBtn: { padding: '12px 6px', background: '#8C7AE6', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
   btnIcon: { fontSize: '16px' },
   badge: { backgroundColor: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', marginLeft: '4px' },
+  controlsContainer: { display: 'flex', flexDirection: 'column', gap: '10px', padding: '0 15px' },
+  searchContainer: { width: '100%', position: 'relative' },
+  searchIcon: { position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px' },
+  searchInput: { padding: '12px 16px 12px 40px', borderRadius: '12px', border: '2px solid', fontSize: '14px', outline: 'none', boxSizing: 'border-box' },
+  filterSelect: { padding: '12px 16px', borderRadius: '12px', border: '2px solid', fontSize: '14px', fontWeight: '500', outline: 'none', cursor: 'pointer', boxSizing: 'border-box' },
   productGrid: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', flexDirection: 'column', gap: '12px' },
   card: { borderRadius: '16px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)', transition: 'all 0.3s ease' },
   cardInfo: { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 },
@@ -566,7 +561,6 @@ const styles = {
   formGroup: { marginBottom: '20px' },
   formRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' },
   label: { display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' },
-  input: { width: '100%', padding: '12px 16px', fontSize: '15px', border: '2px solid', borderRadius: '10px', outline: 'none', transition: 'all 0.3s ease', boxSizing: 'border-box' },
   modalActions: { display: 'flex', gap: '12px', marginTop: '30px' },
   cancelBtn: { flex: 1, padding: '14px', borderRadius: '10px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', transition: 'all 0.3s ease' },
   submitBtn: { flex: 1, padding: '14px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },

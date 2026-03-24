@@ -65,7 +65,6 @@ function FamilyGroups() {
       loadGroups();
       toast.success('¡Miembro agregado correctamente!');
     } catch (error) {
-      // Mostrar el mensaje de error del backend si existe
       const errorMsg = error.response?.data?.detail || 'Error al agregar miembro';
       toast.error(errorMsg);
     }
@@ -93,10 +92,12 @@ function FamilyGroups() {
 
   return (
     <div style={{ ...styles.container, backgroundColor: theme.background }}>
-      {/* Navbar */}
       <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
         <div style={styles.navbarContent}>
           <div style={styles.navbarLeft}>
+            <button onClick={() => navigate('/dashboard')} style={{...styles.backBtn, color: theme.text}}>
+              ⬅ Volver
+            </button>
             <h1 style={styles.logo}>StockApp</h1>
           </div>
           <div style={styles.navbarRight}>
@@ -108,12 +109,11 @@ function FamilyGroups() {
         </div>
       </nav>
 
-      {/* Content */}
       <div style={styles.content}>
         <div style={styles.headerSection}>
           <div>
             <h2 style={{ ...styles.pageTitle, color: theme.text }}>Tus Grupos</h2>
-            <p style={{ color: theme.textMuted, marginTop: '5px' }}>Gestiona los inventarios compartidos con tu familia o compañeros.</p>
+            <p style={{ color: theme.textMuted, marginTop: '5px' }}>Gestiona los inventarios compartidos.</p>
           </div>
           <button onClick={() => setShowCreateModal(true)} style={styles.primaryActionBtn}>
             ➕ Nuevo Grupo
@@ -125,7 +125,7 @@ function FamilyGroups() {
             <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, gridColumn: '1 / -1', border: `1px solid ${theme.border}` }}>
               <span style={{ fontSize: '60px', display: 'block', marginBottom: '15px' }}>🏠</span>
               <h3 style={{ color: theme.text, fontSize: '1.5rem', marginBottom: '10px' }}>No tienes grupos todavía</h3>
-              <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>Crea un grupo para compartir tu inventario y lista de compras con otras personas.</p>
+              <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>Crea un grupo para compartir tu inventario.</p>
             </div>
           ) : (
             groups.map(group => (
@@ -169,7 +169,6 @@ function FamilyGroups() {
         `}
       </style>
 
-      {/* Modal Crear Grupo */}
       {showCreateModal && (
         <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg }} onClick={(e) => e.stopPropagation()}>
@@ -183,7 +182,7 @@ function FamilyGroups() {
             <form onSubmit={handleCreateGroup} style={{ padding: '24px' }}>
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre del Grupo</label>
-                <input type="text" className="custom-input" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ej: Familia Pérez, Departamento 4A" />
+                <input type="text" className="custom-input" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ej: Familia Pérez" />
               </div>
               <div style={styles.modalActions}>
                 <button type="button" onClick={() => setShowCreateModal(false)} style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
@@ -194,7 +193,6 @@ function FamilyGroups() {
         </div>
       )}
 
-      {/* Modal Agregar Miembro */}
       {showAddMemberModal && (
         <div style={styles.modalOverlay} onClick={() => setShowAddMemberModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg }} onClick={(e) => e.stopPropagation()}>
@@ -207,9 +205,8 @@ function FamilyGroups() {
             </div>
             <form onSubmit={handleAddMember} style={{ padding: '24px' }}>
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre de Usuario (Username)</label>
+                <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre de Usuario</label>
                 <input type="text" className="custom-input" value={newMemberUsername} onChange={(e) => setNewMemberUsername(e.target.value)} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ingresa el username exacto..." />
-                <p style={{ fontSize: '13px', color: theme.textMuted, marginTop: '8px' }}>El usuario ya debe tener una cuenta en la aplicación.</p>
               </div>
               <div style={styles.modalActions}>
                 <button type="button" onClick={() => setShowAddMemberModal(false)} style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
@@ -223,7 +220,6 @@ function FamilyGroups() {
   );
 }
 
-// Estilos y Temas
 const lightTheme = { background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85', navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb' };
 const darkTheme = { background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a', navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a' };
 
@@ -234,16 +230,16 @@ const styles = {
   navbar: { padding: '15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
   navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navbarLeft: { display: 'flex', alignItems: 'center' },
+  backBtn: { background: 'none', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0, marginRight: '15px', transition: 'all 0.2s ease' },
   logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
   navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
   themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
   logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
-  username: { fontWeight: '500' },
-  content: { maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' },
-  headerSection: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' },
-  pageTitle: { margin: 0, fontSize: '28px', fontWeight: '700' },
+  content: { maxWidth: '1200px', margin: '0 auto', padding: '20px 15px 40px' },
+  headerSection: { display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' },
+  pageTitle: { margin: 0, fontSize: '24px', fontWeight: '700' },
   primaryActionBtn: { padding: '12px 28px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '15px' },
   groupCard: { borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column' },
   cardHeaderGradient: { background: 'linear-gradient(135deg, #8C7AE6 0%, #C7C8F4 100%)', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   badge: { backgroundColor: 'rgba(255,255,255,0.25)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '600', backdropFilter: 'blur(10px)' },

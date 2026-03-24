@@ -55,16 +55,13 @@ function RegisterPurchase() {
     try {
       await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity);
       
-      // Si por casualidad estaba en la lista de compras, lo quitamos también
       if (selectedProduct.en_lista_compras) {
         await productsAPI.removeFromShoppingList(selectedProduct._id);
       }
 
       setShowModal(false);
       setSelectedProduct(null);
-      loadAllProducts(); // Recargar para ver el stock actualizado
-      
-      // Pequeño feedback visual (opcional)
+      loadAllProducts(); 
       toast.success(`¡Se sumaron ${purchaseQuantity} unidades de ${selectedProduct.nombre}!`);
     } catch (error) {
       toast.error('Error al registrar la compra');
@@ -76,7 +73,6 @@ function RegisterPurchase() {
     navigate('/login');
   };
 
-  // Filtrar productos por la búsqueda
   const filteredProducts = products.filter(product => 
     product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.categoria.toLowerCase().includes(searchTerm.toLowerCase())
@@ -94,10 +90,12 @@ function RegisterPurchase() {
 
   return (
     <div style={{ ...styles.container, backgroundColor: theme.background }}>
-      {/* Navbar */}
       <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
         <div style={styles.navbarContent}>
           <div style={styles.navbarLeft}>
+            <button onClick={() => navigate('/dashboard')} style={{...styles.backBtn, color: theme.text}}>
+              ⬅ Volver
+            </button>
             <h1 style={styles.logo}>StockApp</h1>
           </div>
           <div style={styles.navbarRight}>
@@ -109,20 +107,18 @@ function RegisterPurchase() {
         </div>
       </nav>
 
-      {/* Content */}
       <div style={styles.content}>
         <div style={styles.headerSection}>
           <div>
             <h2 style={{ ...styles.pageTitle, color: theme.text }}>Registrar Compra</h2>
-            <p style={{ color: theme.textMuted, marginTop: '5px' }}>Busca el producto que compraste y suma stock rápidamente.</p>
+            <p style={{ color: theme.textMuted, marginTop: '5px' }}>Busca el producto y suma stock rápidamente.</p>
           </div>
           
-          {/* Buscador */}
           <div style={styles.searchContainer}>
             <span style={styles.searchIcon}>🔍</span>
             <input 
               type="text" 
-              placeholder="Buscar producto o categoría..." 
+              placeholder="Buscar producto..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ ...styles.searchInput, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
@@ -133,7 +129,7 @@ function RegisterPurchase() {
         <div style={styles.grid}>
           {filteredProducts.length === 0 ? (
             <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, gridColumn: '1 / -1', border: `1px solid ${theme.border}` }}>
-              <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>No se encontraron productos con esa búsqueda.</p>
+              <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>No se encontraron productos.</p>
             </div>
           ) : (
             filteredProducts.map(product => (
@@ -157,7 +153,6 @@ function RegisterPurchase() {
         </div>
       </div>
 
-      {/* Modal de Registro de Compra */}
       {showModal && selectedProduct && (
         <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <div 
@@ -209,15 +204,8 @@ function RegisterPurchase() {
   );
 }
 
-// Estilos y Temas
-const lightTheme = {
-  background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85',
-  navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb',
-};
-const darkTheme = {
-  background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a',
-  navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a',
-};
+const lightTheme = { background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85', navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb', };
+const darkTheme = { background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a', navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a', };
 
 const styles = {
   container: { minHeight: '100vh', transition: 'background-color 0.3s' },
@@ -226,19 +214,19 @@ const styles = {
   navbar: { padding: '15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
   navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navbarLeft: { display: 'flex', alignItems: 'center' },
+  backBtn: { background: 'none', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0, marginRight: '15px', transition: 'all 0.2s ease' },
   logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
   navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
   themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
   logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
-  username: { fontWeight: '500' },
-  content: { maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' },
-  headerSection: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' },
-  pageTitle: { margin: 0, fontSize: '28px', fontWeight: '700' },
-  searchContainer: { position: 'relative', width: '100%', maxWidth: '400px' },
+  content: { maxWidth: '1200px', margin: '0 auto', padding: '20px 15px 40px' },
+  headerSection: { display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' },
+  pageTitle: { margin: 0, fontSize: '24px', fontWeight: '700' },
+  searchContainer: { position: 'relative', width: '100%' },
   searchIcon: { position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px' },
   searchInput: { width: '100%', padding: '12px 15px 12px 45px', borderRadius: '12px', border: '2px solid', fontSize: '16px', outline: 'none', boxSizing: 'border-box' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' },
-  productCard: { padding: '20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px', transition: 'transform 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' },
+  productCard: { padding: '15px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '15px', transition: 'transform 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   productName: { margin: 0, fontSize: '18px', fontWeight: '600' },
   categoryBadge: { backgroundColor: '#F7E7FA', color: '#8b5cf6', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600', textTransform: 'capitalize' },
   addBtn: { width: '100%', padding: '12px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '15px' },
