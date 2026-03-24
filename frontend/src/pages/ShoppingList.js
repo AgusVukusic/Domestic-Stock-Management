@@ -100,11 +100,11 @@ function ShoppingList() {
     const groupName = groups.find(g => g._id === activeGroup)?.nombre || '';
 
     let text = `🛒 LISTA DE COMPRAS - ${groupName.toUpperCase()}\n`;
-    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '━━━━━━━━━━━━━━\n\n';
 
     Object.keys(groupedByCategory).sort().forEach(category => {
       text += `📌 ${category.toUpperCase()}\n`;
-      text += '─────────────────────\n';
+      text += '━━━━━━━━━━━━━━\n';
       
       groupedByCategory[category].forEach(product => {
         text += `• ${product.nombre}\n`;
@@ -115,7 +115,7 @@ function ShoppingList() {
       text += '\n';
     });
 
-    text += `━━━━━━━━━━━━━━━━━━━━\n`;
+    text += `━━━━━━━━━━━━━━\n`;
     text += `Total: ${displayedProducts.length} ${displayedProducts.length === 1 ? 'producto' : 'productos'}\n`;
 
     navigator.clipboard.writeText(text).then(() => {

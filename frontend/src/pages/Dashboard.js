@@ -284,7 +284,7 @@ function Dashboard() {
         </div>
 
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
             <div style={{ flex: '1 1 200px', position: 'relative' }}>
               <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px' }}>🔍</span>
               <input 
@@ -436,7 +436,7 @@ function Dashboard() {
             <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Cantidad</label>
-                  <input type="number" className="custom-input" value={formData.cantidad} onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input type="number" className="custom-input" value={formData.cantidad} onFocus={(e) => e.target.select()} onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
               </div>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
@@ -522,21 +522,23 @@ const styles = {
   loadingContainer: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' },
   spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8C7AE6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
   loadingText: { marginTop: '20px', fontSize: '18px' },
-  navbar: { padding: '15px 0', marginBottom: '30px', transition: 'all 0.3s ease' },
-  navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navbarLeft: {},
-  logo: { margin: 0, fontSize: '24px', fontWeight: '700' },
-  navbarRight: { display: 'flex', gap: '15px', alignItems: 'center' },
-  themeBtn: { width: '40px', height: '40px', borderRadius: '10px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' },
-  username: { fontSize: '15px', fontWeight: '500' },
-  logoutBtn: { padding: '8px 20px', background: '#C7C8F4', color: '#2D2D2D', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'all 0.3s ease', boxShadow: '0 2px 8px rgba(199, 200, 244, 0.3)' },
-  actionsContainer: { maxWidth: '1400px', margin: '0 auto 40px', padding: '0 20px' },
-  actionsCard: { padding: '20px', borderRadius: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)', transition: 'all 0.3s ease' },
-  primaryActionBtn: { padding: '12px 28px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)', transition: 'all 0.3s ease' },
-  secondaryActionBtn: { padding: '12px 28px', borderRadius: '12px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' },
-  successActionBtn: { padding: '12px 28px', background: '#8C7AE6', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)', transition: 'all 0.3s ease' },
-  btnIcon: { fontSize: '18px' },
-  badge: { backgroundColor: 'rgba(255,255,255,0.3)', padding: '2px 10px', borderRadius: '12px', fontSize: '13px', fontWeight: '700', marginLeft: '4px' },
+  // --- NAVBAR ---
+  navbar: { padding: '15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
+  navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  navbarLeft: { display: 'flex', alignItems: 'center' },
+  logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
+  navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
+  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' },
+  username: { fontSize: '13px', fontWeight: '600', display: 'none' }, // Ocultamos tu nombre en el celular para hacer más espacio
+  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },actionsContainer: { maxWidth: '1400px', margin: '0 auto 40px', padding: '0 20px' },
+  // --- BOTONES PRINCIPALES ---
+  actionsContainer: { maxWidth: '1400px', margin: '0 auto 20px', padding: '0 15px' },
+  actionsCard: { padding: '15px', borderRadius: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)', transition: 'all 0.3s ease' },
+  primaryActionBtn: { padding: '12px 6px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
+  secondaryActionBtn: { padding: '12px 6px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' },
+  successActionBtn: { padding: '12px 6px', background: '#8C7AE6', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
+  btnIcon: { fontSize: '16px' },
+  badge: { backgroundColor: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', marginLeft: '4px' },
   productGrid: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', flexDirection: 'column', gap: '12px' },
   card: { borderRadius: '16px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)', transition: 'all 0.3s ease' },
   cardInfo: { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 },
