@@ -435,15 +435,15 @@ function Dashboard() {
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
               <input 
                 type="text" 
-                list="categorias-existentes-edit" 
+                list="categorias-existentes" 
                 className="custom-input" 
-                value={editingProduct.categoria} 
-                onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} 
+                value={formData.categoria} 
+                onChange={(e) => setFormData({ ...formData, categoria: e.target.value.toLowerCase() })} 
                 required 
                 style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
                 placeholder="Ej: limpieza, alimentos" 
               />
-              <datalist id="categorias-existentes-edit">
+              <datalist id="categorias-existentes">
                 {groupCategories.map(cat => (
                   <option key={cat} value={cat} />
                 ))}
