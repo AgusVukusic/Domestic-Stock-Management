@@ -142,8 +142,12 @@ function ShoppingList() {
       <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
         <div style={styles.navbarContent}>
           <div style={styles.navbarLeft}>
-            <button onClick={() => navigate('/dashboard')} style={{...styles.backBtn, color: theme.text}}>
-              ⬅ Volver
+            <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Volver
             </button>
             <h1 style={styles.logo}>StockApp</h1>
           </div>
@@ -290,7 +294,7 @@ const styles = {
   navbar: { padding: '15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
   navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navbarLeft: { display: 'flex', alignItems: 'center' },
-  backBtn: { background: 'none', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0, marginRight: '15px', transition: 'all 0.2s ease' },
+  backBtn: { background: 'transparent', border: '2px solid #8C7AE6', color: '#8C7AE6', padding: '6px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '15px', transition: 'all 0.2s ease' },
   logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
   navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
   themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
