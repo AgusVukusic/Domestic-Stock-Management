@@ -8,15 +8,15 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   
-  // Estados para el Modal de Detalles
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userDetails, setUserDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Estados para el Modal de Eliminación
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const navigate = useNavigate();
 
@@ -79,8 +79,13 @@ function AdminDashboard() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.clear();
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     navigate('/login');
   };
 
@@ -105,7 +110,7 @@ function AdminDashboard() {
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
               {darkMode ? '☀️' : '🌙'}
             </button>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
@@ -154,11 +159,10 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Modal de Detalles del Usuario */}
       {showModal && (
         <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6' }}>
+            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '24px' }}>📋</span>
                 <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Detalles: {selectedUser}</h2>
@@ -176,7 +180,7 @@ function AdminDashboard() {
                 </div>
               ) : (
                 userDetails.map((group) => (
-                  <div key={group.group_id} style={{ ...styles.groupCard, backgroundColor: theme.inputBg, border: `1px solid ${theme.border}` }}>
+                  <div key={group.group_id} style={{ padding: '15px', borderRadius: '12px', marginBottom: '15px', backgroundColor: theme.inputBg, border: `1px solid ${theme.border}` }}>
                     <h3 style={{ margin: '0 0 12px 0', color: theme.text, fontSize: '16px', borderBottom: `1px solid ${theme.border}`, paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>👥</span> Grupo: {group.group_name}
                     </h3>
@@ -205,11 +209,10 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* Modal de Confirmación para Eliminar */}
       {showDeleteConfirm && (
         <div style={styles.modalOverlay} onClick={() => setShowDeleteConfirm(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, background: '#e74c3c' }}>
+            <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '24px' }}>⚠️</span>
                 <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Confirmar Eliminación</h2>
@@ -226,15 +229,49 @@ function AdminDashboard() {
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button 
                   onClick={() => setShowDeleteConfirm(false)} 
-                  style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={confirmDelete} 
-                  style={styles.confirmDeleteBtn}
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
                 >
                   Sí, Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      {showLogoutConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>🚪</span>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
+              </div>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                ¿Estás seguro de que deseas cerrar la sesión?
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmLogout} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
+                >
+                  Sí, Salir
                 </button>
               </div>
             </div>
@@ -252,8 +289,6 @@ const styles = {
   container: { minHeight: '100vh', paddingBottom: '40px', transition: 'background-color 0.3s ease' },
   loadingContainer: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' },
   spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8C7AE6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  
-  // Navbar unificada con safe-area-inset, sin botón de volver
   navbar: { padding: 'calc(15px + env(safe-area-inset-top)) 0 15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
   navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navbarLeft: { display: 'flex', alignItems: 'center' },
@@ -261,14 +296,10 @@ const styles = {
   navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
   themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
   logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
-  
-  // Contenido Principal
   content: { maxWidth: '1000px', margin: '0 auto', padding: '10px 15px' },
   headerSection: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' },
   pageTitle: { margin: 0, fontSize: '24px', fontWeight: '700' },
   badge: { backgroundColor: '#8C7AE6', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', boxShadow: '0 2px 8px rgba(140, 122, 230, 0.3)' },
-  
-  // Lista de Usuarios
   userList: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' },
   userCard: { borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   userInfo: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
@@ -276,19 +307,12 @@ const styles = {
   roleBadge: { padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' },
   roleAdmin: { backgroundColor: '#8C7AE6', color: 'white' },
   roleUser: { backgroundColor: '#F7E7FA', color: '#8C7AE6' },
-  
   userActions: { display: 'flex', gap: '10px' },
   actionBtnView: { flex: 1, padding: '10px', background: 'transparent', color: '#8C7AE6', border: '2px solid #8C7AE6', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' },
   actionBtnDelete: { flex: 1, padding: '10px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' },
-
-  // Modales
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
   modal: { borderRadius: '16px', width: '90%', maxWidth: '500px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' },
-  modalHeader: { padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   closeBtn: { background: 'transparent', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  groupCard: { padding: '15px', borderRadius: '12px', marginBottom: '15px' },
-  cancelBtn: { flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent' },
-  confirmDeleteBtn: { flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }
 };
 
 export default AdminDashboard;

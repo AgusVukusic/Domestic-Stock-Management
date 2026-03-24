@@ -13,9 +13,10 @@ function ShoppingList() {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const navigate = useNavigate();
-  const username = localStorage.getItem('username');
 
   useEffect(() => {
     loadShoppingList();
@@ -72,11 +73,21 @@ function ShoppingList() {
     }
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    localStorage.clear();
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    navigate('/login');
+  };
+
   const displayedProducts = products.filter(p => p.owner_id === activeGroup);
 
   const handleExport = () => {
     if (displayedProducts.length === 0) {
-      toast.error('No hay productos en la lista de este grupo para exportar');
+      toast.error('No hay productos en la lista para exportar');
       return;
     }
 
@@ -121,11 +132,6 @@ function ShoppingList() {
     });
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
-  };
-
   const theme = darkMode ? darkTheme : lightTheme;
 
   if (loading) {
@@ -155,14 +161,12 @@ function ShoppingList() {
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
               {darkMode ? '☀️' : '🌙'}
             </button>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
 
       <div style={styles.content}>
-        
-        {/* ENCABEZADO Y SELECTOR REORGANIZADO */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ ...styles.listTitle, color: theme.text }}>Lista de Compras</h2>
@@ -258,24 +262,58 @@ function ShoppingList() {
               <p style={{ color: theme.text, marginBottom: '20px', fontSize: '1.05rem', lineHeight: '1.5' }}>
                 ¿Cuántas unidades de <strong>{selectedProduct.nombre}</strong> agregaste al inventario?
               </p>
-              
-              <style>
-                {`
-                  .purchase-input { width: 100%; padding: 12px 16px; border-radius: 8px; border-width: 1px; border-style: solid; font-size: 1.1rem; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
-                  .purchase-input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
-                `}
-              </style>
 
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500', fontSize: '0.9rem' }}>Cantidad adquirida</label>
-                <input type="number" min="1" className="purchase-input" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} />
+                <input 
+                  type="number" min="1" 
+                  value={purchaseQuantity} 
+                  onFocus={(e) => e.target.select()} 
+                  onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} 
+                  required 
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '1.1rem', backgroundColor: theme.inputBg, color: theme.text, boxSizing: 'border-box' }} 
+                />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
-                <button type="button" onClick={() => setShowPurchaseModal(false)} style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={styles.submitBtn}>Confirmar Compra</button>
+                <button type="button" onClick={() => setShowPurchaseModal(false)} style={{ flex: 1, padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', backgroundColor: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
+                <button type="submit" style={{ flex: 1, backgroundColor: '#8b5cf6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '500', cursor: 'pointer' }}>Confirmar Compra</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      {showLogoutConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ ...styles.modalHeader, background: '#e74c3c', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>🚪</span>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
+              </div>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                ¿Estás seguro de que deseas cerrar la sesión?
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmLogout} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
+                >
+                  Sí, Salir
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -326,8 +364,6 @@ const styles = {
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(45, 45, 45, 0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
   modal: { borderRadius: '20px', width: '90%', maxWidth: '450px', maxHeight: '90vh', overflow: 'auto' },
   closeBtn: { background: 'transparent', border: 'none', color: 'rgba(255, 255, 255, 0.7)', fontSize: '1.5rem', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'background-color 0.2s' },
-  cancelBtn: { flex: 1, padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', transition: 'all 0.2s', backgroundColor: 'transparent' },
-  submitBtn: { flex: 1, backgroundColor: '#8b5cf6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.3)', transition: 'transform 0.1s' },
 };
 
 export default ShoppingList;

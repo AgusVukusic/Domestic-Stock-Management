@@ -8,13 +8,14 @@ function FamilyGroups() {
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   
-  // Estados para modales
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [newMemberUsername, setNewMemberUsername] = useState('');
+  
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
@@ -75,8 +76,13 @@ function FamilyGroups() {
     setShowAddMemberModal(true);
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.clear();
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     navigate('/login');
   };
 
@@ -108,7 +114,7 @@ function FamilyGroups() {
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
               {darkMode ? '☀️' : '🌙'}
             </button>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
@@ -166,17 +172,10 @@ function FamilyGroups() {
         </div>
       </div>
 
-      <style>
-        {`
-          .custom-input { width: 100%; padding: 12px 16px; border-radius: 8px; border-width: 1px; border-style: solid; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
-          .custom-input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
-        `}
-      </style>
-
       {showCreateModal && (
         <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6' }}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '24px' }}>🏠</span>
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Crear Grupo Familiar</h2>
@@ -186,11 +185,11 @@ function FamilyGroups() {
             <form onSubmit={handleCreateGroup} style={{ padding: '24px' }}>
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre del Grupo</label>
-                <input type="text" className="custom-input" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ej: Familia Pérez" />
+                <input type="text" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} required style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '1rem', boxSizing: 'border-box', backgroundColor: theme.inputBg, color: theme.text }} placeholder="Ej: Familia Pérez" />
               </div>
-              <div style={styles.modalActions}>
-                <button type="button" onClick={() => setShowCreateModal(false)} style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={styles.submitBtn}>Crear Grupo</button>
+              <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
+                <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
+                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }}>Crear Grupo</button>
               </div>
             </form>
           </div>
@@ -199,8 +198,8 @@ function FamilyGroups() {
 
       {showAddMemberModal && (
         <div style={styles.modalOverlay} onClick={() => setShowAddMemberModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6' }}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '24px' }}>✉️</span>
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Invitar Miembro</h2>
@@ -210,13 +209,47 @@ function FamilyGroups() {
             <form onSubmit={handleAddMember} style={{ padding: '24px' }}>
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre de Usuario</label>
-                <input type="text" className="custom-input" value={newMemberUsername} onChange={(e) => setNewMemberUsername(e.target.value)} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ingresa el username exacto..." />
+                <input type="text" value={newMemberUsername} onChange={(e) => setNewMemberUsername(e.target.value)} required style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '1rem', boxSizing: 'border-box', backgroundColor: theme.inputBg, color: theme.text }} placeholder="Ingresa el username exacto..." />
               </div>
-              <div style={styles.modalActions}>
-                <button type="button" onClick={() => setShowAddMemberModal(false)} style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={styles.submitBtn}>Agregar</button>
+              <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
+                <button type="button" onClick={() => setShowAddMemberModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
+                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }}>Agregar</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      {showLogoutConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>🚪</span>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
+              </div>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                ¿Estás seguro de que deseas cerrar la sesión?
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmLogout} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
+                >
+                  Sí, Salir
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -251,11 +284,7 @@ const styles = {
   emptyState: { padding: '60px 20px', textAlign: 'center', borderRadius: '16px' },
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
   modal: { width: '90%', maxWidth: '450px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' },
-  modalHeader: { padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   closeBtn: { background: 'transparent', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' },
-  modalActions: { display: 'flex', gap: '12px', borderTop: '1px solid #e8d9eb', paddingTop: '16px' },
-  cancelBtn: { flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600' },
-  submitBtn: { flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }
 };
 
 export default FamilyGroups;

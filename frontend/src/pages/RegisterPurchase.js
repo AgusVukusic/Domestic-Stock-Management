@@ -9,13 +9,13 @@ function RegisterPurchase() {
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   
-  // Estados para el modal
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const navigate = useNavigate();
-  const username = localStorage.getItem('username');
 
   useEffect(() => {
     loadAllProducts();
@@ -68,8 +68,13 @@ function RegisterPurchase() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.clear();
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     navigate('/login');
   };
 
@@ -106,7 +111,7 @@ function RegisterPurchase() {
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
               {darkMode ? '☀️' : '🌙'}
             </button>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
@@ -159,15 +164,8 @@ function RegisterPurchase() {
 
       {showModal && selectedProduct && (
         <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div 
-            style={{ 
-              ...styles.modal, 
-              backgroundColor: theme.cardBg,
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-            }} 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6' }}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '24px' }}>📦</span>
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Sumar al Inventario</h2>
@@ -182,25 +180,50 @@ function RegisterPurchase() {
               
               <div style={{ marginBottom: '24px' }}>
                 <input
-                  type="number"
-                  min="1"
-                  value={purchaseQuantity}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)}
-                  required
-                  style={{ ...styles.qtyInput, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+                  type="number" min="1" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `2px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
                 />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ ...styles.cancelBtn, color: theme.text, border: `1px solid ${theme.border}` }}>
-                  Cancelar
-                </button>
-                <button type="submit" style={styles.submitBtn}>
-                  Confirmar Compra
-                </button>
+                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
+                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }}>Confirmar Compra</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      {showLogoutConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>🚪</span>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
+              </div>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                ¿Estás seguro de que deseas cerrar la sesión?
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmLogout} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
+                >
+                  Sí, Salir
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -237,11 +260,7 @@ const styles = {
   emptyState: { padding: '40px', textAlign: 'center', borderRadius: '16px' },
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
   modal: { width: '90%', maxWidth: '400px', borderRadius: '16px', overflow: 'hidden' },
-  modalHeader: { padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   closeBtn: { background: 'transparent', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' },
-  qtyInput: { width: '100%', padding: '12px', borderRadius: '8px', border: '2px solid', fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center' },
-  cancelBtn: { flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600' },
-  submitBtn: { flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }
 };
 
 export default RegisterPurchase;

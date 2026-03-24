@@ -12,6 +12,7 @@ function Dashboard() {
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   // Estados para Filtros y Ordenamiento
   const [activeGroup, setActiveGroup] = useState('');
@@ -65,7 +66,11 @@ function Dashboard() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.clear();
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     navigate('/login');
@@ -217,7 +222,7 @@ function Dashboard() {
               {darkMode ? '☀️' : '🌙'}
             </button>
             <span style={{ ...styles.username, color: theme.textMuted }}>👤 {username}</span>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
@@ -596,6 +601,40 @@ function Dashboard() {
             </div>
         </form>
         </div>
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      {showLogoutConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ ...styles.modalHeader, background: '#e74c3c' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>🚪</span>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
+              </div>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                ¿Estás seguro de que deseas cerrar la sesión?
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmLogout} 
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
+                >
+                  Sí, Salir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     )}
     </div>
