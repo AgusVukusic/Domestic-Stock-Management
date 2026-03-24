@@ -259,7 +259,6 @@ function Dashboard() {
       <div style={{ maxWidth: '1400px', margin: '0 auto 20px', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px', padding: '0 15px' }}>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: theme.text }}>
-    
              Inventario de
           </h2>
           <select
@@ -268,14 +267,12 @@ function Dashboard() {
             style={{ 
               ...styles.filterSelect, 
               width: 'auto', 
- 
               padding: '4px 10px', 
               flex: 1, 
               backgroundColor: theme.inputBg, 
               color: theme.text, 
               borderColor: theme.border,
               margin: 0
-      
             }}
           >
             {groups.map(g => (
@@ -285,7 +282,6 @@ function Dashboard() {
         </div>
 
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
-    
           <div style={styles.controlsContainer}>
           <div style={styles.searchContainer}>
             <span style={{...styles.searchIcon, color: theme.textMuted}}>🔍</span>
@@ -293,7 +289,6 @@ function Dashboard() {
               type="text"
               placeholder="Buscar productos..."
               value={searchTerm}
-              
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ ...styles.searchInput, width: '100%', backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
             />
@@ -302,13 +297,11 @@ function Dashboard() {
           <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
             <select
               value={activeCategory}
-        
               onChange={(e) => setActiveCategory(e.target.value)}
               style={{
                 flex: 1, padding: '10px 12px', borderRadius: '10px', border: `2px solid ${theme.border}`,
                 backgroundColor: theme.inputBg, color: theme.text, outline: 'none', cursor: 'pointer',
                 boxSizing: 'border-box'
-            
               }}
             >
               <option value="">🏷️ Filtrar categorias</option>
@@ -317,21 +310,18 @@ function Dashboard() {
               ))}
             </select>
 
-         
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={{
                 flex: 1, padding: '10px 12px', borderRadius: '10px', border: `2px solid ${theme.border}`,
                 backgroundColor: theme.inputBg, color: theme.text, outline: 'none', cursor: 'pointer',
-    
                 boxSizing: 'border-box'
               }}
             >
               <option value="name-asc">🔤 A-Z</option>
               <option value="name-desc">🔠 Z-A</option>
               <option value="stock-asc">📈 Stock (Asc)</option>
-            
               <option value="stock-desc">📉 Stock (Desc)</option>
             </select>
           </div>
@@ -340,36 +330,30 @@ function Dashboard() {
       </div>
 
       <div style={styles.productGrid}>
-        {groups.length === 0 ?
-        (
+        {groups.length === 0 ? (
           <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
             <div style={styles.emptyIcon}>👥</div>
             <h3 style={{ ...styles.emptyTitle, color: theme.text }}>No tienes grupos familiares</h3>
             <p style={{ ...styles.emptyText, color: theme.textMuted }}>Para comenzar a agregar productos, primero debes crear un grupo (puedes estar tú solo en él).</p>
-            <button onClick={() => navigate('/groups')} 
-              style={styles.emptyBtn}>
+            <button onClick={() => navigate('/groups')} style={styles.emptyBtn}>
               Crear mi primer grupo
             </button>
           </div>
-        ) : products.filter(p => p.owner_id === activeGroup).length === 0 ?
-        (
+        ) : products.filter(p => p.owner_id === activeGroup).length === 0 ? (
           <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
             <div style={styles.emptyIcon}>📦</div>
             <h3 style={{ ...styles.emptyTitle, color: theme.text }}>Inventario vacío</h3>
             <p style={{ ...styles.emptyText, color: theme.textMuted }}>No hay productos registrados en este grupo.</p>
             <button onClick={() => setShowModal(true)} style={styles.emptyBtn}>
-           
               Agregar Producto
             </button>
           </div>
-        ) : displayedProducts.length === 0 ?
-        (
+        ) : displayedProducts.length === 0 ? (
           <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
             <div style={styles.emptyIcon}>🔍</div>
             <h3 style={{ ...styles.emptyTitle, color: theme.text }}>Sin resultados</h3>
             <p style={{ ...styles.emptyText, color: theme.textMuted }}>No se encontraron productos con esos filtros.</p>
             <button onClick={() => { setSearchTerm(''); setActiveCategory(''); setSortBy('name-asc'); }} style={styles.emptyBtn}>
-       
               Limpiar filtros
             </button>
           </div>
@@ -394,7 +378,6 @@ function Dashboard() {
                 </div>
 
                 {product.notas && (
-                
                   <div style={{ ...styles.notes, color: theme.textMuted }}>{product.notas}</div>
                 )}
               </div>
@@ -424,7 +407,6 @@ function Dashboard() {
         <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', margin: 0, borderBottom: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        
               <span style={{ fontSize: '24px' }}>📦</span>
               <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Nuevo Producto</h2>
             </div>
@@ -438,8 +420,7 @@ function Dashboard() {
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
-       
-               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Grupo asignado</label>
+              <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Grupo asignado</label>
               <select className="custom-input custom-select" value={formData.owner_id || activeGroup} onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })} style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} required>
                 {groups.map(group => (
                   <option key={group._id} value={group._id}>👥 {group.nombre}</option>
@@ -447,47 +428,39 @@ function Dashboard() {
               </select>
             </div>
 
-   
             <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Cantidad</label>
-                  <input type="number" className="custom-input" value={formData.cantidad} onFocus={(e) => e.target.select()} onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })} 
-                    required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input type="number" className="custom-input" value={formData.cantidad} onFocus={(e) => e.target.select()} onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
               </div>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
-                  <input type="number" className="custom-input" value={formData.stock_min} onFocus={(e) => e.target.select()} onChange={(e) => 
-                    setFormData({ ...formData, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input type="number" className="custom-input" value={formData.stock_min} onFocus={(e) => e.target.select()} onChange={(e) => setFormData({ ...formData, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
               </div>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
               
- 
               {/* Contenedor del Input Compuesto */}
               <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: '8px', overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
                 
                 {/* 1. Campo para escribir a mano */}
-          
                 <input 
                   type="text" 
                   value={formData.categoria} 
                   onChange={(e) => setFormData({ ...formData, categoria: e.target.value.toLowerCase() })} 
                   required 
-           
                   style={{ flex: 1, border: 'none', padding: '10px 12px', fontSize: '1rem', backgroundColor: 'transparent', color: theme.text, outline: 'none', width: '100%' }} 
                   placeholder="Ej: limpieza, alimentos" 
                 />
                 
                 {/* 2. Línea divisora */}
- 
                 <div style={{ width: '1px', backgroundColor: theme.border, margin: '6px 0' }}></div>
                 
                 {/* 3. Dropdown con la flechita violeta */}
                 <select 
                   value="" 
- 
                   onChange={(e) => {
                     if (e.target.value) setFormData({ ...formData, categoria: e.target.value });
                   }} 
@@ -495,38 +468,32 @@ function Dashboard() {
                     width: '45px', 
                     border: 'none', 
                     backgroundColor: 'transparent', 
-              
                     color: 'transparent', 
                     outline: 'none', 
                     cursor: 'pointer', 
                     appearance: 'none', 
                     backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b5cf6%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', 
-    
                     backgroundRepeat: 'no-repeat', 
                     backgroundPosition: 'center', 
                     backgroundSize: '12px auto' 
                   }}
                 >
-   
                   <option value="" disabled></option>
                   {groupCategories.map(cat => (
                     <option key={cat} value={cat} style={{ color: '#000' }}>{cat}</option>
                   ))}
                 </select>
-   
             </div>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '24px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Notas (opcional)</label>
-              <textarea className="custom-input" value={formData.notas} onChange={(e) => setFormData({ ...formData, notas: e.target.value })} style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, minHeight: '80px', resize: 
-                'vertical' }} placeholder="Detalles..." />
+              <textarea className="custom-input" value={formData.notas} onChange={(e) => setFormData({ ...formData, notas: e.target.value })} style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, minHeight: '80px', resize: 'vertical' }} placeholder="Detalles..." />
             </div>
 
             <div style={{ ...styles.modalActions, display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
               <button type="button" onClick={() => setShowModal(false)} style={{ ...styles.cancelBtn, backgroundColor: theme.cancelBtnBg, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
               <button type="submit" style={styles.submitBtn}>Guardar Producto</button>
-            
             </div>
         </form>
         </div>
@@ -537,53 +504,44 @@ function Dashboard() {
     {showEditModal && editingProduct && (
     <div style={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
         <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', margin: 0, borderBottom: 'none', display: 'flex', alignItems: 
-          'center', justifyContent: 'space-between' }}>
+        <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', margin: 0, borderBottom: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '24px' }}>✏️</span>
               <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Editar Producto</h2>
             </div>
             <button onClick={() => setShowEditModal(false)} style={styles.closeBtn}>✕</button>
-      
          </div>
 
         <form onSubmit={handleEditSubmit} style={{ ...styles.modalForm, padding: '24px' }}>
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Nombre del producto</label>
               <input type="text" className="custom-input" value={editingProduct.nombre} onChange={(e) => setEditingProduct({ ...editingProduct, nombre: e.target.value })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ej: Jabón Dove" />
-   
             </div>
 
             <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.textMuted, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock actual</label>
                   <input 
-  
                     type="number" 
                     className="custom-input" 
                     value={editingProduct.cantidad} 
                     disabled 
-                  
                     style={{ backgroundColor: theme.background, color: theme.textMuted, borderColor: theme.border, cursor: 'not-allowed', opacity: 0.7 }} 
                     title="El stock se modifica sumando o restando desde los botones"
                   />
               </div>
               <div style={{...styles.formGroup, flex: 1}}>
-        
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
                   <input 
                     type="number" 
                     className="custom-input" 
-               
                     value={editingProduct.stock_min} 
                     onFocus={(e) => e.target.select()} 
-                    onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) ||
-                      0 })} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) || 0 })} 
                     required 
                     style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
                     placeholder="0" 
                   />
-          
               </div>
             </div>
 
@@ -591,71 +549,62 @@ function Dashboard() {
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
               
               {/* Contenedor del Input Compuesto */}
-         
              <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: '8px', overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
                 
                 {/* 1. Campo para escribir a mano */}
                 <input 
                   type="text" 
- 
                   value={editingProduct.categoria} 
                   onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} 
                   required 
                   style={{ flex: 1, border: 'none', padding: '10px 12px', fontSize: '1rem', backgroundColor: 'transparent', color: theme.text, outline: 'none', width: '100%' }} 
- 
                   placeholder="Ej: limpieza, alimentos" 
                 />
                 
                 {/* 2. Línea divisora */}
                 <div style={{ width: '1px', backgroundColor: theme.border, margin: '6px 0' }}></div>
    
-             
                 {/* 3. Dropdown con la flechita violeta */}
                 <select 
                   value="" 
                   onChange={(e) => {
-        
                     if (e.target.value) setEditingProduct({ ...editingProduct, categoria: e.target.value });
                   }} 
                   style={{ 
                     width: '45px', 
                     border: 'none', 
                     backgroundColor: 'transparent', 
-              
                     color: 'transparent', 
                     outline: 'none', 
                     cursor: 'pointer', 
                     appearance: 'none', 
                     backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b5cf6%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', 
-    
                     backgroundRepeat: 'no-repeat', 
                     backgroundPosition: 'center', 
                     backgroundSize: '12px auto' 
                   }}
                 >
-   
                   <option value="" disabled></option>
                   {groupCategories.map(cat => (
                     <option key={cat} value={cat} style={{ color: '#000' }}>{cat}</option>
                   ))}
                 </select>
-   
             </div>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '24px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Notas (opcional)</label>
-              <textarea className="custom-input" value={editingProduct.notas ||
-                ''} onChange={(e) => setEditingProduct({ ...editingProduct, notas: e.target.value })} style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, minHeight: '80px', resize: 'vertical' }} placeholder="Detalles..." />
+              <textarea className="custom-input" value={editingProduct.notas || ''} onChange={(e) => setEditingProduct({ ...editingProduct, notas: e.target.value })} style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, minHeight: '80px', resize: 'vertical' }} placeholder="Detalles..." />
             </div>
 
             <div style={{ ...styles.modalActions, display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
               <button type="button" onClick={() => setShowEditModal(false)} style={{ ...styles.cancelBtn, backgroundColor: theme.cancelBtnBg, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-           
               <button type="submit" style={styles.submitBtn}>Actualizar</button>
             </div>
         </form>
         </div>
+    </div>
+    )}
 
       {/* Modal de Confirmación de Cierre de Sesión */}
       {showLogoutConfirm && (
@@ -678,32 +627,26 @@ function Dashboard() {
                 <button 
                   onClick={() => setShowLogoutConfirm(false)} 
                   style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
-   
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={confirmLogout} 
-                 
                   style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
                 >
                   Sí, Salir
                 </button>
               </div>
-       
              </div>
           </div>
         </div>
       )}
-    </div>
-    )}
     </div>
   );
 }
 
 const lightTheme = { background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85', navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb', cancelBtnBg: '#F7E7FA' };
 const darkTheme = { background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a', navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a', cancelBtnBg: '#3a3a3a' };
-
 const styles = {
   container: { minHeight: '100vh', paddingBottom: '40px', transition: 'background-color 0.3s ease' },
   loadingContainer: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' },
@@ -720,8 +663,7 @@ const styles = {
   actionsContainer: { maxWidth: '1400px', margin: '0 auto 20px', padding: '0 15px' },
   actionsCard: { padding: '15px', borderRadius: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)', transition: 'all 0.3s ease' },
   primaryActionBtn: { padding: '12px 6px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
-  secondaryActionBtn: { padding: '12px 6px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', 
-  alignItems: 'center', justifyContent: 'center', gap: '6px' },
+  secondaryActionBtn: { padding: '12px 6px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' },
   successActionBtn: { padding: '12px 6px', background: '#8C7AE6', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
   btnIcon: { fontSize: '16px' },
   badge: { backgroundColor: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', marginLeft: '4px' },
