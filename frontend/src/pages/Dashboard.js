@@ -17,7 +17,7 @@ function Dashboard() {
   const [activeGroup, setActiveGroup] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
-  const [sortBy, setSortBy] = useState('');
+  const [sortBy, setSortBy] = useState('name-asc');
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -269,7 +269,6 @@ function Dashboard() {
               margin: 0
             }}
           >
-            <option value="">Todos los grupos</option>
             {groups.map(g => (
               <option key={g._id} value={g._id}>{g.nombre}</option>
             ))}
@@ -299,7 +298,7 @@ function Dashboard() {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="">🏷️ Todas</option>
+              <option value="">🏷️ Filtrar categorias</option>
               {groupCategories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -314,11 +313,10 @@ function Dashboard() {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="">↕️ Ordenar</option>
               <option value="name-asc">🔤 A-Z</option>
               <option value="name-desc">🔠 Z-A</option>
-              <option value="stock-asc">📉 Stock (-)</option>
-              <option value="stock-desc">📈 Stock (+)</option>
+              <option value="stock-asc">📈 Stock (Asc)</option>
+              <option value="stock-desc">📉 Stock (Desc)</option>
             </select>
           </div>
         </div>
@@ -349,7 +347,7 @@ function Dashboard() {
             <div style={styles.emptyIcon}>🔍</div>
             <h3 style={{ ...styles.emptyTitle, color: theme.text }}>Sin resultados</h3>
             <p style={{ ...styles.emptyText, color: theme.textMuted }}>No se encontraron productos con esos filtros.</p>
-            <button onClick={() => { setSearchTerm(''); setActiveCategory(''); setSortBy(''); }} style={styles.emptyBtn}>
+            <button onClick={() => { setSearchTerm(''); setActiveCategory(''); setSortBy('name-asc'); }} style={styles.emptyBtn}>
               Limpiar filtros
             </button>
           </div>
@@ -435,7 +433,21 @@ function Dashboard() {
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
-              <input type="text" className="custom-input" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value.toLowerCase() })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ej: limpieza, alimentos" />
+              <input 
+                type="text" 
+                list="categorias-existentes-edit" 
+                className="custom-input" 
+                value={editingProduct.categoria} 
+                onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} 
+                required 
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
+                placeholder="Ej: limpieza, alimentos" 
+              />
+              <datalist id="categorias-existentes-edit">
+                {groupCategories.map(cat => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '24px'}}>
@@ -472,18 +484,48 @@ function Dashboard() {
 
             <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
               <div style={{...styles.formGroup, flex: 1}}>
-                  <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Cantidad</label>
-                  <input type="number" className="custom-input" value={editingProduct.cantidad} onFocus={(e) => e.target.select()} onChange={(e) => setEditingProduct({ ...editingProduct, cantidad: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <label style={{ ...styles.label, color: theme.textMuted, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock actual</label>
+                  <input 
+                    type="number" 
+                    className="custom-input" 
+                    value={editingProduct.cantidad} 
+                    disabled 
+                    style={{ backgroundColor: theme.background, color: theme.textMuted, borderColor: theme.border, cursor: 'not-allowed', opacity: 0.7 }} 
+                    title="El stock se modifica sumando o restando desde los botones"
+                  />
               </div>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
-                  <input type="number" className="custom-input" value={editingProduct.stock_min} onFocus={(e) => e.target.select()} onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input 
+                    type="number" 
+                    className="custom-input" 
+                    value={editingProduct.stock_min} 
+                    onFocus={(e) => e.target.select()} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) || 0 })} 
+                    required 
+                    style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
+                    placeholder="0" 
+                  />
               </div>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Categoría</label>
-              <input type="text" className="custom-input" value={editingProduct.categoria} onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="Ej: limpieza, alimentos" />
+              <input 
+                type="text" 
+                list="categorias-existentes-edit" 
+                className="custom-input" 
+                value={editingProduct.categoria} 
+                onChange={(e) => setEditingProduct({ ...editingProduct, categoria: e.target.value.toLowerCase() })} 
+                required 
+                style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
+                placeholder="Ej: limpieza, alimentos" 
+              />
+              <datalist id="categorias-existentes-edit">
+                {groupCategories.map(cat => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '24px'}}>
