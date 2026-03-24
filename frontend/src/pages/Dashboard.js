@@ -17,7 +17,7 @@ function Dashboard() {
   const [activeGroup, setActiveGroup] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
-  const [sortBy, setSortBy] = useState(''); // <-- Nuevo estado para ordenar
+  const [sortBy, setSortBy] = useState(''); // <-- estado para ordenar
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -254,49 +254,46 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* TÍTULO Y SELECTOR INTEGRADO */}
       <div style={{ maxWidth: '1400px', margin: '0 auto 20px', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-          <h4 style={{ margin: 0, fontSize: '15px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '700', color: theme.text }}>
-            Inventario del Grupo
-          </h4>
-          
-          {groups.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ color: theme.textMuted, fontSize: '14px', fontWeight: '500' }}>Viendo:</span>
-              <select
-                value={activeGroup}
-                onChange={(e) => {
-                  setActiveGroup(e.target.value);
-                  setActiveCategory(''); 
-                }}
-                style={{
-                  padding: '10px 16px', borderRadius: '10px', border: `2px solid ${theme.border}`,
-                  backgroundColor: theme.cardBg, color: theme.text, fontWeight: '600', fontSize: '15px',
-                  outline: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-                }}
-              >
-                {groups.map(g => (
-                  <option key={g._id} value={g._id}>👥 {g.nombre}</option>
-                ))}
-              </select>
-            </div>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px', padding: '0 15px' }}>
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: theme.text }}>
+            Inventario de
+          </h2>
+          <select
+            value={activeGroup}
+            onChange={(e) => setActiveGroup(e.target.value)}
+            style={{ 
+              ...styles.filterSelect, 
+              width: 'auto', 
+              padding: '4px 10px', 
+              flex: 1, 
+              backgroundColor: theme.inputBg, 
+              color: theme.text, 
+              borderColor: theme.border,
+              margin: 0
+            }}
+          >
+            <option value="">Todos los grupos</option>
+            {groups.map(g => (
+              <option key={g._id} value={g._id}>{g.nombre}</option>
+            ))}
+          </select>
         </div>
 
+        {/* CONTROLES (Buscador y Categoría) */}
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-            <div style={{ flex: '1 1 200px', position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px' }}>🔍</span>
-              <input 
-                type="text" 
-                placeholder="Buscar por nombre o nota..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%', padding: '10px 15px 10px 40px', borderRadius: '10px', border: `2px solid ${theme.border}`, backgroundColor: theme.inputBg, color: theme.text, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
-                onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
-                onBlur={(e) => e.target.style.borderColor = theme.border}
-              />
-            </div>
+        <div style={styles.controlsContainer}>
+          <div style={styles.searchContainer}>
+            <span style={{...styles.searchIcon, color: theme.textMuted}}>🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar productos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ ...styles.searchInput, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+            />
+        </div>
 
             <select
               value={activeCategory}
@@ -440,7 +437,7 @@ function Dashboard() {
               </div>
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
-                  <input type="number" className="custom-input" value={formData.stock_min} onChange={(e) => setFormData({ ...formData, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
+                  <input type="number" className="custom-input" value={formData.stock_min} onFocus={(e) => e.target.select()} onChange={(e) => setFormData({ ...formData, stock_min: parseInt(e.target.value) || 0 })} required style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} placeholder="0" />
               </div>
             </div>
 

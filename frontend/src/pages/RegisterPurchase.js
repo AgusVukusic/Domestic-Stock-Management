@@ -95,20 +95,16 @@ function RegisterPurchase() {
   return (
     <div style={{ ...styles.container, backgroundColor: theme.background }}>
       {/* Navbar */}
-      <nav style={{ ...styles.navbar, backgroundColor: theme.navbarBg, borderBottom: `1px solid ${theme.border}` }}>
+      <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
         <div style={styles.navbarContent}>
           <div style={styles.navbarLeft}>
-            <button onClick={() => navigate('/dashboard')} style={{ ...styles.backBtn, backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }}>
-              ← Volver
-            </button>
-            <h1 style={{ ...styles.logo, color: theme.text }}>🛍️ Compra Rápida</h1>
+            <h1 style={styles.logo}>StockApp</h1>
           </div>
           <div style={styles.navbarRight}>
-            <button onClick={toggleTheme} style={{ ...styles.themeBtn, backgroundColor: theme.cardBg, color: theme.text, border: `1px solid ${theme.border}` }}>
+            <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
               {darkMode ? '☀️' : '🌙'}
             </button>
-            <span style={{ ...styles.username, color: theme.textMuted }}>👤 {username}</span>
-            <button onClick={handleLogout} style={styles.logoutBtn}>Cerrar Sesión</button>
+            <button onClick={handleLogout} style={styles.logoutBtn}>Salir</button>
           </div>
         </div>
       </nav>
@@ -190,6 +186,7 @@ function RegisterPurchase() {
                   type="number"
                   min="1"
                   value={purchaseQuantity}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)}
                   required
                   style={{ ...styles.qtyInput, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
@@ -226,14 +223,13 @@ const styles = {
   container: { minHeight: '100vh', transition: 'background-color 0.3s' },
   loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
   spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8b5cf6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  navbar: { padding: '15px 0' },
-  navbarContent: { maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navbarLeft: { display: 'flex', alignItems: 'center', gap: '20px' },
-  navbarRight: { display: 'flex', gap: '15px', alignItems: 'center' },
-  logo: { margin: 0, fontSize: '22px', fontWeight: '700' },
-  backBtn: { padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', border: 'none' },
-  themeBtn: { width: '40px', height: '40px', borderRadius: '10px', cursor: 'pointer', fontSize: '18px', border: 'none' },
-  logoutBtn: { padding: '8px 20px', background: '#C7C8F4', color: '#2D2D2D', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '600' },
+  navbar: { padding: '15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
+  navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  navbarLeft: { display: 'flex', alignItems: 'center' },
+  logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
+  navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
+  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
+  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
   username: { fontWeight: '500' },
   content: { maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' },
   headerSection: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' },
