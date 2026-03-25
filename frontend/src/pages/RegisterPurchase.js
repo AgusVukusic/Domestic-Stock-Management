@@ -121,8 +121,15 @@ function RegisterPurchase() {
     );
   }
 
-  // Filtramos los productos para mostrar solo los del grupo seleccionado
-  const displayedProducts = products.filter(p => p.owner_id === activeGroup);
+  // 1. Primero filtramos por el grupo seleccionado
+  let displayedProducts = products.filter(p => p.owner_id === activeGroup);
+
+  // 2. Si el usuario escribió algo en el buscador, filtramos sobre esa lista
+  if (searchTerm) {
+    displayedProducts = displayedProducts.filter(p => 
+      p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
 
   return (
     <div style={{ ...styles.container, backgroundColor: theme.background }}>
@@ -193,7 +200,7 @@ function RegisterPurchase() {
               <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>No se encontraron productos.</p>
             </div>
           ) : (
-            filteredProducts.map(product => (
+            displayedProducts.map(product => (
               <div key={product._id} style={{ ...styles.productCard, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
                 <div>
                   <h3 style={{ ...styles.productName, color: theme.text }}>{product.nombre}</h3>
