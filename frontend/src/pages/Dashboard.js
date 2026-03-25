@@ -13,6 +13,8 @@ function Dashboard() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  //Estado para bloquear el boton de agregar a la lista de compras
+  const [processingListId, setProcessingListId] = useState(null);
 
   // Estados para Filtros y Ordenamiento
   const [activeGroup, setActiveGroup] = useState('');
@@ -153,17 +155,24 @@ function Dashboard() {
   };
 
   const toggleShoppingList = async (product) => {
+    // Bloqueamos únicamente el botón del producto que seleccionamos
+    setProcessingListId(product._id);
+    const toastId = toast.loading('Actualizando lista...');
+    
     try {
       if (product.en_lista_compras) {
         await productsAPI.removeFromShoppingList(product._id);
-        toast.success(`${product.nombre} quitado de la lista`);
+        toast.success(`${product.nombre} quitado de la lista`, { id: toastId });
       } else {
         await productsAPI.addToShoppingList(product._id);
-        toast.success(`${product.nombre} agregado a las compras`);
+        toast.success(`${product.nombre} agregado a las compras`, { id: toastId });
       }
       loadData();
     } catch (error) {
-      toast.error('Error al actualizar lista de compras');
+      toast.error('Error al actualizar lista de compras', { id: toastId });
+    } finally {
+      // Liberamos el botón seteando el ID nuevamente a null
+      setProcessingListId(null);
     }
   };
 
@@ -398,8 +407,17 @@ function Dashboard() {
                 <button onClick={() => handleDecrease(product._id, product.nombre)} disabled={product.cantidad === 0} style={{ ...styles.actionBtn, ...styles.actionBtnUse, opacity: product.cantidad === 0 ? 0.5 : 1 }}>
                   ➖
                 </button>
-                <button onClick={() => toggleShoppingList(product)} style={{ ...styles.actionBtn, ...(product.en_lista_compras ? styles.actionBtnInList : { backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }) }}>
-                  {product.en_lista_compras ? '✓' : '🛒'}
+                <button 
+                  onClick={() => toggleShoppingList(product)} 
+                  disabled={processingListId === product._id}
+                  style={{ 
+                    ...styles.actionBtn, 
+                    ...(product.en_lista_compras ? styles.actionBtnInList : { backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }),
+                    opacity: processingListId === product._id ? 0.5 : 1,
+                    cursor: processingListId === product._id ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {processingListId === product._id ? '⏳' : (product.en_lista_compras ? '✓' : '🛒')}
                 </button>
                 <button onClick={() => openEditModal(product)} style={{ ...styles.actionBtn, backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }}>
                   ✏️

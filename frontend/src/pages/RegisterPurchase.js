@@ -12,6 +12,8 @@ function RegisterPurchase() {
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  // Estado para bloquear el botón mientras procesamos la compra
+  const [isPurchasing, setIsPurchasing] = useState(false);
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -52,19 +54,29 @@ function RegisterPurchase() {
     e.preventDefault();
     if (!selectedProduct) return;
 
+    // Bloqueamos el botón en la interfaz para evitar dobles clics
+    setIsPurchasing(true);
+    const toastId = toast.loading('Registrando compra...');
+
     try {
+      // Enviamos la petición para sumar las unidades al inventario
       await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity);
       
+      // Verificamos si estaba en la lista de compras y, si es así, lo quitamos
       if (selectedProduct.en_lista_compras) {
         await productsAPI.removeFromShoppingList(selectedProduct._id);
       }
 
+      // Cerramos el modal, limpiamos la selección y recargamos los datos
       setShowModal(false);
       setSelectedProduct(null);
       loadAllProducts(); 
-      toast.success(`¡Se sumaron ${purchaseQuantity} unidades de ${selectedProduct.nombre}!`);
+      toast.success(`¡Se sumaron ${purchaseQuantity} unidades de ${selectedProduct.nombre}!`, { id: toastId });
     } catch (error) {
-      toast.error('Error al registrar la compra');
+      toast.error('Error al registrar la compra', { id: toastId });
+    } finally {
+      // Liberamos el botón obligatoriamente, ya sea que la petición falló o tuvo éxito
+      setIsPurchasing(false);
     }
   };
 
@@ -187,7 +199,23 @@ function RegisterPurchase() {
 
               <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }}>Confirmar Compra</button>
+                <button 
+                  type="submit" 
+                  disabled={isPurchasing}
+                  style={{ 
+                    flex: 1, 
+                    padding: '12px', 
+                    borderRadius: '8px', 
+                    cursor: isPurchasing ? 'not-allowed' : 'pointer', 
+                    background: '#8b5cf6', 
+                    color: 'white', 
+                    border: 'none', 
+                    fontWeight: '600',
+                    opacity: isPurchasing ? 0.7 : 1
+                  }}
+                >
+                  {isPurchasing ? 'Confirmando...' : 'Confirmar Compra'}
+                </button>
               </div>
             </form>
           </div>

@@ -16,6 +16,7 @@ function FamilyGroups() {
   const [newMemberUsername, setNewMemberUsername] = useState('');
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
@@ -47,13 +48,25 @@ function FamilyGroups() {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
+    
+    // Bloqueamos el botón en la interfaz visual
+    setIsCreating(true);
+    const toastId = toast.loading('Creando grupo...');
+
     try {
+      // Enviamos la petición al servidor para crear el grupo
       await groupsAPI.create(newGroupName);
+      
+      // Limpiamos el formulario y actualizamos la vista
       setNewGroupName('');
       setShowCreateModal(false);
       loadGroups();
+      toast.success('¡Grupo creado exitosamente!', { id: toastId });
     } catch (error) {
-      toast.error('Error al crear el grupo');
+      toast.error('Error al crear el grupo', { id: toastId });
+    } finally {
+      // Liberamos el botón obligatoriamente al finalizar el proceso
+      setIsCreating(false);
     }
   };
 
@@ -189,7 +202,23 @@ function FamilyGroups() {
               </div>
               <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
                 <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }}>Crear Grupo</button>
+                <button 
+                  type="submit" 
+                  disabled={isCreating}
+                  style={{ 
+                    flex: 1, 
+                    padding: '12px', 
+                    borderRadius: '8px', 
+                    background: '#8b5cf6', 
+                    color: 'white', 
+                    border: 'none', 
+                    fontWeight: '600',
+                    cursor: isCreating ? 'not-allowed' : 'pointer',
+                    opacity: isCreating ? 0.7 : 1
+                  }}
+                >
+                  {isCreating ? 'Creando...' : 'Crear Grupo'}
+                </button>
               </div>
             </form>
           </div>

@@ -13,6 +13,7 @@ function ShoppingList() {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -61,15 +62,25 @@ function ShoppingList() {
     e.preventDefault();
     if (!selectedProduct) return;
 
+    // Bloqueamos el botón en la interfaz para evitar clics duplicados
+    setIsPurchasing(true);
+    const toastId = toast.loading('Registrando compra...');
+
     try {
+      // Sumamos el stock y quitamos el producto de la lista de compras
       await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity);
       await productsAPI.removeFromShoppingList(selectedProduct._id);
       
+      // Cerramos el modal, limpiamos la selección y recargamos los datos
       setShowPurchaseModal(false);
       setSelectedProduct(null);
       loadShoppingList();
+      toast.success(`¡Compraste ${selectedProduct.nombre}!`, { id: toastId });
     } catch (error) {
-      toast.error('Error al registrar la compra');
+      toast.error('Error al registrar la compra', { id: toastId });
+    } finally {
+      // Liberamos el botón obligatoriamente al finalizar
+      setIsPurchasing(false);
     }
   };
 
@@ -277,7 +288,23 @@ function ShoppingList() {
 
               <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
                 <button type="button" onClick={() => setShowPurchaseModal(false)} style={{ flex: 1, padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', backgroundColor: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={{ flex: 1, backgroundColor: '#8b5cf6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '500', cursor: 'pointer' }}>Confirmar Compra</button>
+                <button 
+                  type="submit" 
+                  disabled={isPurchasing}
+                  style={{ 
+                    flex: 1, 
+                    backgroundColor: '#8b5cf6', 
+                    color: 'white', 
+                    border: 'none', 
+                    padding: '10px 24px', 
+                    borderRadius: '8px', 
+                    fontWeight: '500', 
+                    cursor: isPurchasing ? 'not-allowed' : 'pointer',
+                    opacity: isPurchasing ? 0.7 : 1
+                  }}
+                >
+                  {isPurchasing ? 'Confirmando...' : 'Confirmar Compra'}
+                </button>
               </div>
             </form>
           </div>
