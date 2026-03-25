@@ -12,6 +12,8 @@ function Dashboard() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
   // Estados para Filtros y Ordenamiento
   const [activeGroup, setActiveGroup] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +76,11 @@ function Dashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Bloqueamos el botón en la interfaz
+    setIsCreating(true);
     const toastId = toast.loading('Guardando producto...');
+    
     try {
       const dataToSubmit = {
         ...formData,
@@ -82,13 +88,19 @@ function Dashboard() {
         owner_id: formData.owner_id || activeGroup
       };
       
+      // Enviamos la petición al servidor
       await productsAPI.create(dataToSubmit);
+      
       setShowModal(false);
+      // Reiniciamos los valores del formulario
       setFormData({ nombre: '', cantidad: 0, categoria: '', stock_min: 0, notas: '', owner_type: 'group', owner_id: '' });
       loadData();
       toast.success('¡Producto agregado al inventario!', { id: toastId });
     } catch (error) {
       toast.error('Error al crear producto', { id: toastId });
+    } finally {
+      // Liberamos el botón, sin importar si la petición falló o tuvo éxito
+      setIsCreating(false);
     }
   };
 
@@ -493,7 +505,17 @@ function Dashboard() {
 
             <div style={{ ...styles.modalActions, display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
               <button type="button" onClick={() => setShowModal(false)} style={{ ...styles.cancelBtn, backgroundColor: theme.cancelBtnBg, color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-              <button type="submit" style={styles.submitBtn}>Guardar Producto</button>
+              <button 
+                type="submit" 
+                disabled={isCreating}
+                style={{ 
+                  ...styles.submitBtn, 
+                  opacity: isCreating ? 0.7 : 1,
+                  cursor: isCreating ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isCreating ? 'Guardando...' : 'Guardar Producto'}
+              </button>
             </div>
         </form>
         </div>
