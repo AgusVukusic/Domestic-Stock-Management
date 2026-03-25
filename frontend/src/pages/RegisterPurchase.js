@@ -22,7 +22,7 @@ function RegisterPurchase() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadAllProducts();
+    loadData();
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setDarkMode(true);
@@ -86,7 +86,7 @@ function RegisterPurchase() {
       // Cerramos el modal, limpiamos la selección y recargamos los datos
       setShowModal(false);
       setSelectedProduct(null);
-      loadAllProducts(); 
+      loadData(); 
       toast.success(`¡Se sumaron ${purchaseQuantity} unidades de ${selectedProduct.nombre}!`, { id: toastId });
     } catch (error) {
       toast.error('Error al registrar la compra', { id: toastId });
