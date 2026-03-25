@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base de tu API
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://stock-app-backend-cg7w.onrender.com';
 
 // Crear instancia de axios con configuración
 const api = axios.create({
