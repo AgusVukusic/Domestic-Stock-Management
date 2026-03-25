@@ -1,15 +1,22 @@
-from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv, find_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
-# Cargar variables de entorno desde .env
-load_dotenv()
+# Buscamos el archivo .env por todas las carpetas automáticamente y lo cargamos
+load_dotenv(find_dotenv())
 
-# Obtener connection string desde variable de entorno
+# Obtenemos la cadena de conexión (connection string)
 MONGODB_URL = os.getenv("MONGODB_URL")
 
-# Crear cliente de MongoDB asíncrono usando Motor
+# --- HACEMOS UNA PRUEBA DE FUEGO ---
+print("\n=== DEBUG INFO ===")
+print("Archivo .env encontrado en:", find_dotenv())
+print("La URL cargada es:", MONGODB_URL)
+print("==================\n")
+# -----------------------
+
+# Creamos el cliente de MongoDB asíncrono
 client = AsyncIOMotorClient(MONGODB_URL)
 
-# Seleccionar la base de datos
+# Seleccionamos la base de datos
 db = client["stock_app_db"]

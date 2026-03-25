@@ -8,11 +8,11 @@ class MemberDetail(BaseModel):
     username: str
 
 class Group(BaseModel):
-    nombre: str                             #nombre del grupo
+    nombre: str                             #Nombre del grupo
     created_by: str                         #ID del usuario que creó el grupo
     members: List[str] = []                 #Lista de IDs de usuarios miembros
-    created_at: Optional[datetime] = None   #fecha de creacion
+    created_at: Optional[datetime] = None   #Fecha de creacion
 
 class GroupInDB(Group):
-    id: Optional[str] = Field(None, alias="_id")
-    members_detail: Optional[List[MemberDetail]] = []
+    id: Optional[str] = Field(None, alias="_id")        #Mapemaos el ID que genera MongoDB
+    members_detail: Optional[List[MemberDetail]] = []   #Agregamos la lista con los detalles extendidos de cada miembro
