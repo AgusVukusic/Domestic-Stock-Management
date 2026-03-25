@@ -417,7 +417,7 @@ function Dashboard() {
                     cursor: processingListId === product._id ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {processingListId === product._id ? '⏳' : (product.en_lista_compras ? '✓' : '🛒')}
+                  {product.en_lista_compras ? '✓' : '🛒'}
                 </button>
                 <button onClick={() => openEditModal(product)} style={{ ...styles.actionBtn, backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }}>
                   ✏️
