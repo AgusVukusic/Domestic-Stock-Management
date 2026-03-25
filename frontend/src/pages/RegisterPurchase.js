@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { productsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { productsAPI, groupsAPI } from '../services/api';
 
