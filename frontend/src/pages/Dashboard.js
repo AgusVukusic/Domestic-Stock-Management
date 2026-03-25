@@ -50,8 +50,16 @@ function Dashboard() {
       setProducts(productsRes.data);
       setGroups(groupsRes.data);
       
-      if (groupsRes.data.length > 0 && !activeGroup) {
+      // Recuperamos el último grupo que visitamos desde el almacenamiento local
+      const savedGroup = localStorage.getItem('lastActiveGroup');
+      
+      // Verificamos si teníamos un grupo guardado y si todavía existe
+      if (savedGroup && groupsRes.data.some(g => g._id === savedGroup)) {
+        setActiveGroup(savedGroup);
+      } else if (groupsRes.data.length > 0 && !activeGroup) {
+        // Si no hay nada guardado, seleccionamos el primero por defecto y lo guardamos
         setActiveGroup(groupsRes.data[0]._id);
+        localStorage.setItem('lastActiveGroup', groupsRes.data[0]._id);
       }
     } catch (error) {
       toast.error('Error al cargar la información');
@@ -284,16 +292,14 @@ function Dashboard() {
           </h2>
           <select
             value={activeGroup}
-            onChange={(e) => setActiveGroup(e.target.value)}
+            onChange={(e) => {
+              // Actualizamos el estado y guardamos la elección en la memoria del navegador
+              setActiveGroup(e.target.value);
+              localStorage.setItem('lastActiveGroup', e.target.value);
+            }}
             style={{ 
-              ...styles.filterSelect, 
-              width: 'auto', 
-              padding: '4px 10px', 
-              flex: 1, 
-              backgroundColor: theme.inputBg, 
-              color: theme.text, 
-              borderColor: theme.border,
-              margin: 0
+              ...styles.filterSelect, width: 'auto', padding: '4px 10px', flex: 1, 
+              backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border, margin: 0
             }}
           >
             {groups.map(g => (

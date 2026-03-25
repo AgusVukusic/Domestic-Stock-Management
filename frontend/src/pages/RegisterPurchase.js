@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { productsAPI, groupsAPI } from '../services/api';
 
 function RegisterPurchase() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [groups, setGroups] = useState([]);
+  const [activeGroup, setActiveGroup] = useState('');
   
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -27,12 +30,26 @@ function RegisterPurchase() {
     }
   }, []);
 
-  const loadAllProducts = async () => {
+  const loadData = async () => {
     try {
-      const response = await productsAPI.getAll();
-      setProducts(response.data);
+      // Obtenemos tanto los productos como los grupos en paralelo
+      const [productsRes, groupsRes] = await Promise.all([
+        productsAPI.getAll(),
+        groupsAPI.getAll()
+      ]);
+      
+      setProducts(productsRes.data);
+      setGroups(groupsRes.data);
+      
+      // Leemos el mismo grupo que dejamos seleccionado en el Dashboard
+      const savedGroup = localStorage.getItem('lastActiveGroup');
+      if (savedGroup && groupsRes.data.some(g => g._id === savedGroup)) {
+        setActiveGroup(savedGroup);
+      } else if (groupsRes.data.length > 0) {
+        setActiveGroup(groupsRes.data[0]._id);
+      }
     } catch (error) {
-      console.error('Error cargando productos:', error);
+      toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
     }
@@ -105,6 +122,9 @@ function RegisterPurchase() {
     );
   }
 
+  // Filtramos los productos para mostrar solo los del grupo seleccionado
+  const displayedProducts = products.filter(p => p.owner_id === activeGroup);
+
   return (
     <div style={{ ...styles.container, backgroundColor: theme.background }}>
       <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
@@ -135,6 +155,27 @@ function RegisterPurchase() {
             <p style={{ color: theme.textMuted, marginTop: '5px' }}>Busca el producto y suma stock rápidamente.</p>
           </div>
           
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
+          <span style={{ fontWeight: '600', color: theme.text }}>🛒 Comprando para:</span>
+          <select
+            value={activeGroup}
+            onChange={(e) => {
+              // Cambiamos el grupo actual y lo sincronizamos globalmente
+              setActiveGroup(e.target.value);
+              localStorage.setItem('lastActiveGroup', e.target.value);
+            }}
+            style={{ 
+              padding: '8px 12px', borderRadius: '10px', flex: 1,
+              backgroundColor: theme.inputBg, color: theme.text, 
+              border: `2px solid ${theme.border}`, outline: 'none' 
+            }}
+          >
+            {groups.map(g => (
+              <option key={g._id} value={g._id}>{g.nombre}</option>
+            ))}
+          </select>
+        </div>
+
           <div style={styles.searchContainer}>
             <span style={styles.searchIcon}>🔍</span>
             <input 
