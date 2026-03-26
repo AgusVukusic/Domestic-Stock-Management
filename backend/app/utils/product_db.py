@@ -17,7 +17,8 @@ def product_helper(product) -> dict:
         "stock_min": product["stock_min"],
         "owner_type": product["owner_type"],
         "owner_id": product["owner_id"],
-        "en_lista_compras": product.get("en_lista_compras", False)
+        "en_lista_compras": product.get("en_lista_compras", False),
+        "ultimo_precio": product.get("ultimo_precio", 0.0)
     }
 
 async def get_access_query(user_id: str, product_id: str = None):

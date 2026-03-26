@@ -23,7 +23,6 @@ function ShoppingList() {
   useEffect(() => {
     loadShoppingList();
     const savedTheme = localStorage.getItem('theme');
-    console.log(" spy: productos cargados ->", products);
     if (savedTheme === 'dark') {
       setDarkMode(true);
     }
