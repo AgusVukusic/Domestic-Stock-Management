@@ -23,6 +23,7 @@ function ShoppingList() {
   useEffect(() => {
     loadShoppingList();
     const savedTheme = localStorage.getItem('theme');
+    console.log(" spy: productos cargados ->", products);
     if (savedTheme === 'dark') {
       setDarkMode(true);
     }
@@ -261,7 +262,7 @@ function ShoppingList() {
 
           {/* TARJETA DE COSTO ESTIMADO */}
           {displayedProducts.length > 0 && (
-            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '15px 20px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '20px 25px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginTop: '20px', marginBottom: '30px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ fontSize: '28px' }}>💰</span>
                 <div>
