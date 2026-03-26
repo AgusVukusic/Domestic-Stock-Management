@@ -134,7 +134,7 @@ async def increase_product_stock(
 ):
     try:
         # Ahora le pasamos también el precio a nuestra función de base de datos
-        result = await increase_stock(product_id, cantidad, precio, current_user.id)
+        result = await increase_stock(product_id, cantidad, current_user.id, precio)
         if result:
             return {"message": "Stock incrementado", "product": result}
         raise HTTPException(status_code=404, detail="Producto no encontrado")
