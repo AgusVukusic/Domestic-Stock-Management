@@ -14,6 +14,7 @@ function ShoppingList() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchasePrice, setPurchasePrice] = useState('');
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -56,22 +57,24 @@ function ShoppingList() {
     setSelectedProduct(product);
     setPurchaseQuantity(1);
     setShowPurchaseModal(true);
+    setPurchasePrice('');
   };
 
   const handleConfirmPurchase = async (e) => {
     e.preventDefault();
     if (!selectedProduct) return;
 
-    // Bloqueamos el botón en la interfaz para evitar clics duplicados
     setIsPurchasing(true);
     const toastId = toast.loading('Registrando compra...');
 
     try {
-      // Sumamos el stock y quitamos el producto de la lista de compras
-      await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity);
+      // Parseamos el precio enviado
+      const priceToSend = parseFloat(purchasePrice) || 0;
+
+      // Enviamos cantidad y precio a la base de datos
+      await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity, priceToSend);
       await productsAPI.removeFromShoppingList(selectedProduct._id);
       
-      // Cerramos el modal, limpiamos la selección y recargamos los datos
       setShowPurchaseModal(false);
       setSelectedProduct(null);
       loadShoppingList();
@@ -79,7 +82,6 @@ function ShoppingList() {
     } catch (error) {
       toast.error('Error al registrar la compra', { id: toastId });
     } finally {
-      // Liberamos el botón obligatoriamente al finalizar
       setIsPurchasing(false);
     }
   };
@@ -142,6 +144,13 @@ function ShoppingList() {
       toast.success('✓ Lista copiada al portapapeles!');
     });
   };
+
+  //Calculamos el costo estimado total
+  //Por cada producto vemos cuantos faltan para llegar al minimo y lo multiplicamos por su precio
+  const estimatedTotal = displayedProducts.reduce((total, product) => {
+    const cantidadFaltante = Math.max(1, product.stock_min - product.cantidad);
+    return total + ((product.ultimo_precio || 0) * cantidadFaltante);
+  }, 0);
 
   const theme = darkMode ? darkTheme : lightTheme;
 
@@ -250,6 +259,22 @@ function ShoppingList() {
               ))}
             </div>
 
+          {/* TARJETA DE COSTO ESTIMADO */}
+          {displayedProducts.length > 0 && (
+            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '15px 20px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <span style={{ fontSize: '28px' }}>💰</span>
+                <div>
+                  <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted, fontWeight: '600', textTransform: 'uppercase' }}>Costo Estimado</p>
+                  <p style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: theme.text }}>${estimatedTotal.toFixed(2)}</p>
+                </div>
+              </div>
+              <div style={{ fontSize: '12px', color: theme.textMuted, textAlign: 'right', maxWidth: '120px', lineHeight: '1.4' }}>
+                Basado en el historial de precios
+              </div>
+            </div>
+          )}
+
             <div style={styles.exportSection}>
               <button onClick={handleExport} style={styles.exportBtn}>📤 Exportar Lista</button>
               <p style={{ ...styles.exportHint, color: theme.textMuted }}>Copia la lista para enviarla por WhatsApp</p>
@@ -274,16 +299,27 @@ function ShoppingList() {
                 ¿Cuántas unidades de <strong>{selectedProduct.nombre}</strong> agregaste al inventario?
               </p>
 
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500', fontSize: '0.9rem' }}>Cantidad adquirida</label>
-                <input 
-                  type="number" min="1" 
-                  value={purchaseQuantity} 
-                  onFocus={(e) => e.target.select()} 
-                  onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} 
-                  required 
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '1.1rem', backgroundColor: theme.inputBg, color: theme.text, boxSizing: 'border-box' }} 
-                />
+              {/* Dividimos el espacio en dos columnas para cantidad y precio */}
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '24px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.text, marginBottom: '8px', fontWeight: '500' }}>
+                    Cantidad
+                  </label>
+                  <input
+                    type="number" min="1" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                  />
+                </div>
+                
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.text, marginBottom: '8px', fontWeight: '500' }}>
+                    Precio Unit. ($)
+                  </label>
+                  <input
+                    type="number" min="0" step="0.01" placeholder="Opcional" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                  />
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>

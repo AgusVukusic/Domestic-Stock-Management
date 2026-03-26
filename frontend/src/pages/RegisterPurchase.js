@@ -16,6 +16,8 @@ function RegisterPurchase() {
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   // Estado para bloquear el botón mientras procesamos la compra
   const [isPurchasing, setIsPurchasing] = useState(false);
+  // Estado para guardar el precio que pagamos (en blanco por defecto)
+  const [purchasePrice, setPurchasePrice] = useState('');
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -63,6 +65,8 @@ function RegisterPurchase() {
   const handleOpenModal = (product) => {
     setSelectedProduct(product);
     setPurchaseQuantity(1);
+    // Limpiamos el precio cada vez que abrimos la ventana
+    setPurchasePrice('');
     setShowModal(true);
   };
 
@@ -75,8 +79,10 @@ function RegisterPurchase() {
     const toastId = toast.loading('Registrando compra...');
 
     try {
+      // Convertimos el precio a número (si está vacío, mandamos 0)
+      const priceToSend = parseFloat(purchasePrice) || 0;
       // Enviamos la petición para sumar las unidades al inventario
-      await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity);
+      await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity, priceToSend);
       
       // Verificamos si estaba en la lista de compras y, si es así, lo quitamos
       if (selectedProduct.en_lista_compras) {
@@ -237,11 +243,26 @@ function RegisterPurchase() {
                 ¿Cuántas unidades de <strong>{selectedProduct.nombre}</strong> compraste?
               </p>
               
-              <div style={{ marginBottom: '24px' }}>
-                <input
-                  type="number" min="1" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `2px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
-                />
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '24px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.textMuted, marginBottom: '8px', fontWeight: '500' }}>
+                    Cantidad
+                  </label>
+                  <input
+                    type="number" min="1" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `2px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                  />
+                </div>
+                
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.textMuted, marginBottom: '8px', fontWeight: '500' }}>
+                    Precio Unit. ($)
+                  </label>
+                  <input
+                    type="number" min="0" step="0.01" placeholder="Opcional" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `2px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                  />
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>

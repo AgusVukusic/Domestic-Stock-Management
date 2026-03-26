@@ -120,8 +120,8 @@ async def decrease_stock(product_id: str, cantidad: int, user_id: str):
     updated_product = await products_collection.find_one({"_id": ObjectId(product_id)})
     return product_helper(updated_product)
 
-async def increase_stock(product_id: str, cantidad: int, user_id: str):
-    """Incrementar el stock de un producto"""
+async def increase_stock(product_id: str, cantidad: int, user_id: str, precio: float = 0.0):
+    """Incrementar el stock de un producto y actualizar su precio"""
     products_collection = get_products_collection()
     query = await get_access_query(user_id, product_id)
     
@@ -129,11 +129,17 @@ async def increase_stock(product_id: str, cantidad: int, user_id: str):
     if not product:
         return None
         
-    nueva_cantidad = product.get("cantidad", 0) + cantidad
+    # Preparamos todos los datos a actualizar en un solo diccionario
+    update_data = {"cantidad": product.get("cantidad", 0) + cantidad}
     
+    # Si hay un precio nuevo, lo sumamos al diccionario
+    if precio > 0.0:
+        update_data["ultimo_precio"] = precio
+        
+    # Hacemos una única llamada a la base de datos con todos los cambios
     await products_collection.update_one(
         {"_id": ObjectId(product_id)},
-        {"$set": {"cantidad": nueva_cantidad}}
+        {"$set": update_data}
     )
     
     updated_product = await products_collection.find_one({"_id": ObjectId(product_id)})

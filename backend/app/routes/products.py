@@ -129,10 +129,12 @@ async def decrease_product_stock(
 async def increase_product_stock(
     product_id: str,
     cantidad: int = Query(1, ge=1),
+    precio: float = Query(0.0, ge=0.0), # Recibimos el parámetro del precio
     current_user: UserInDB = Depends(get_current_user)
 ):
     try:
-        result = await increase_stock(product_id, cantidad, current_user.id)
+        # Ahora le pasamos también el precio a nuestra función de base de datos
+        result = await increase_stock(product_id, cantidad, precio, current_user.id)
         if result:
             return {"message": "Stock incrementado", "product": result}
         raise HTTPException(status_code=404, detail="Producto no encontrado")
