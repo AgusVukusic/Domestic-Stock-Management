@@ -17,6 +17,7 @@ function ShoppingList() {
   const [purchasePrice, setPurchasePrice] = useState('');
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showPriceDetails, setShowPriceDetails] = useState(false);
 
   const navigate = useNavigate();
 
@@ -149,7 +150,7 @@ function ShoppingList() {
   //Por cada producto vemos cuantos faltan para llegar al minimo y lo multiplicamos por su precio
   const estimatedTotal = displayedProducts.reduce((total, product) => {
     const cantidadFaltante = Math.max(1, product.stock_min - product.cantidad);
-    return total + ((product.ultimo_precio || 0) * cantidadFaltante);
+    return total + ((parseFloat(product.ultimo_precio) || 0) * cantidadFaltante);
   }, 0);
 
   const theme = darkMode ? darkTheme : lightTheme;
@@ -269,8 +270,18 @@ function ShoppingList() {
                   <p style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: theme.text }}>${estimatedTotal.toFixed(2)}</p>
                 </div>
               </div>
-              <div style={{ fontSize: '12px', color: theme.textMuted, textAlign: 'right', maxWidth: '120px', lineHeight: '1.4' }}>
-                Basado en el historial de precios
+              
+              {/* Nueva sección derecha con el botón */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                <div style={{ fontSize: '12px', color: theme.textMuted, textAlign: 'right', maxWidth: '120px', lineHeight: '1.4' }}>
+                  Basado en el historial de precios
+                </div>
+                <button 
+                  onClick={() => setShowPriceDetails(true)}
+                  style={{ padding: '6px 12px', backgroundColor: 'transparent', color: theme.text, border: `1px solid ${theme.border}`, borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', gap: '6px', alignItems: 'center' }}
+                >
+                  Ver Detalles
+                </button>
               </div>
             </div>
           )}
@@ -379,6 +390,51 @@ function ShoppingList() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de Detalles de Precios */}
+      {showPriceDetails && (
+        <div style={styles.modalOverlay} onClick={() => setShowPriceDetails(false)}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', background: '#8C7AE6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>📊</span>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Desglose de Precios</h2>
+              </div>
+              <button onClick={() => setShowPriceDetails(false)} style={styles.closeBtn}>✕</button>
+            </div>
+            
+            <div style={{ padding: '24px', maxHeight: '60vh', overflowY: 'auto' }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {displayedProducts.map(p => {
+                  const cantidadFaltante = Math.max(1, p.stock_min - p.cantidad);
+                  const precioUnidad = parseFloat(p.ultimo_precio) || 0;
+                  const subtotal = cantidadFaltante * precioUnidad;
+                  
+                  return (
+                    <li key={p._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${theme.border}` }}>
+                      <div>
+                        <span style={{ color: theme.text, fontWeight: '600', fontSize: '15px', display: 'block', marginBottom: '4px' }}>{p.nombre}</span>
+                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>
+                          {cantidadFaltante} {cantidadFaltante === 1 ? 'unidad' : 'unidades'} a ${precioUnidad.toFixed(2)} c/u
+                        </span>
+                      </div>
+                      <span style={{ color: theme.text, fontWeight: '700', fontSize: '15px' }}>
+                        ${subtotal.toFixed(2)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '15px', borderTop: `2px dashed ${theme.border}` }}>
+                <span style={{ color: theme.text, fontWeight: '700', fontSize: '16px' }}>Total Estimado</span>
+                <span style={{ color: '#8C7AE6', fontWeight: '800', fontSize: '20px' }}>${estimatedTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
       )}
     </div>
   );
