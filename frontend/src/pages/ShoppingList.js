@@ -273,9 +273,6 @@ function ShoppingList() {
               
               {/* Nueva sección derecha con el botón */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-                <div style={{ fontSize: '12px', color: theme.textMuted, textAlign: 'right', maxWidth: '120px', lineHeight: '1.4' }}>
-                  Basado en el historial de precios
-                </div>
                 <button 
                   onClick={() => setShowPriceDetails(true)}
                   style={{ padding: '6px 12px', backgroundColor: 'transparent', color: theme.text, border: `1px solid ${theme.border}`, borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', gap: '6px', alignItems: 'center' }}
