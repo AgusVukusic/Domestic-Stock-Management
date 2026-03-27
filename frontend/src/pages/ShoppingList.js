@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { Sun, Moon, LogOut, ShoppingCart, Check, Share, DollarSign, BarChart2, X } from 'lucide-react';
 
 function ShoppingList() {
   const [products, setProducts] = useState([]);
@@ -184,7 +185,7 @@ function ShoppingList() {
           </div>
           <div style={styles.navbarRight}>
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
-              {darkMode ? '☀️' : '🌙'}
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
@@ -213,7 +214,7 @@ function ShoppingList() {
                 }}
               >
                 {groups.map(g => (
-                  <option key={g._id} value={g._id}>👥 Lista de: {g.nombre}</option>
+                  <option key={g._id} value={g._id}>Lista de: {g.nombre}</option>
                 ))}
               </select>
             </div>
@@ -222,7 +223,9 @@ function ShoppingList() {
 
         {displayedProducts.length === 0 ? (
           <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
-            <div style={styles.emptyIcon}>🛒</div>
+            <div style={{ ...styles.emptyIcon, color: theme.textMuted }}>
+              <ShoppingCart size={60} strokeWidth={1.5} />
+            </div>
             <h2 style={{ ...styles.emptyTitle, color: theme.text }}>La lista está vacía</h2>
             <p style={{ ...styles.emptyText, color: theme.textMuted }}>Agrega productos desde el dashboard</p>
             <button onClick={() => navigate('/dashboard')} style={styles.emptyBtn}>Ir al Dashboard</button>
@@ -271,7 +274,7 @@ function ShoppingList() {
           {displayedProducts.length > 0 && (
             <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '20px 25px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginTop: '20px', marginBottom: '30px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ fontSize: '28px' }}>💰</span>
+                <span style={{ color: '#8C7AE6' }}><DollarSign size={32} /></span>
                 <div>
                   <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted, fontWeight: '600', textTransform: 'uppercase' }}>Costo Estimado</p>
                   <p style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: theme.text }}>${estimatedTotal.toFixed(2)}</p>
@@ -291,7 +294,9 @@ function ShoppingList() {
           )}
 
             <div style={styles.exportSection}>
-              <button onClick={handleExport} style={styles.exportBtn}>📤 Exportar Lista</button>
+              <button onClick={handleExport} style={{ ...styles.exportBtn, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Share size={18} /> Exportar Lista
+              </button>
               <p style={{ ...styles.exportHint, color: theme.textMuted }}>Copia la lista para enviarla por WhatsApp</p>
             </div>
           </>
@@ -302,11 +307,11 @@ function ShoppingList() {
         <div style={styles.modalOverlay} onClick={() => setShowPurchaseModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>🛒</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <ShoppingCart size={24} />
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Registrar Compra</h2>
               </div>
-              <button onClick={() => setShowPurchaseModal(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowPurchaseModal(false)} style={styles.closeBtn}><X size={24} /></button>
             </div>
 
             <form onSubmit={handleConfirmPurchase} style={{ padding: '24px' }}>
@@ -367,11 +372,11 @@ function ShoppingList() {
         <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ ...styles.modalHeader, background: '#e74c3c', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>🚪</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <LogOut size={24} />
                 <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
               </div>
-              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}><X size={24} /></button>
             </div>
             <div style={{ padding: '24px', textAlign: 'center' }}>
               <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
@@ -401,11 +406,11 @@ function ShoppingList() {
         <div style={styles.modalOverlay} onClick={() => setShowPriceDetails(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '20px 24px', background: '#8C7AE6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>📊</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <BarChart2 size={24} />
                 <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Desglose de Precios</h2>
               </div>
-              <button onClick={() => setShowPriceDetails(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowPriceDetails(false)} style={styles.closeBtn}><X size={24} /></button>
             </div>
             
             <div style={{ padding: '24px', maxHeight: '60vh', overflowY: 'auto' }}>

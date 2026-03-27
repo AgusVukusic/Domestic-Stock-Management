@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { productsAPI, groupsAPI } from '../services/api';
+import { Sun, Moon, ShoppingCart, Search, Plus, Package, LogOut, X } from 'lucide-react';
 
 function RegisterPurchase() {
   const [products, setProducts] = useState([]);
@@ -153,7 +154,7 @@ function RegisterPurchase() {
           </div>
           <div style={styles.navbarRight}>
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
-              {darkMode ? '☀️' : '🌙'}
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
@@ -168,7 +169,9 @@ function RegisterPurchase() {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
-          <span style={{ fontWeight: '600', color: theme.text }}>🛒 Comprando para:</span>
+          <span style={{ fontWeight: '600', color: theme.text, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ShoppingCart size={18} /> Comprando para:
+          </span>
           <select
             value={activeGroup}
             onChange={(e) => {
@@ -189,7 +192,9 @@ function RegisterPurchase() {
         </div>
 
           <div style={styles.searchContainer}>
-            <span style={styles.searchIcon}>🔍</span>
+            <span style={{ ...styles.searchIcon, color: theme.textMuted }}>
+              <Search size={18} />
+            </span>
             <input 
               type="text" 
               placeholder="Buscar producto..." 
@@ -217,9 +222,9 @@ function RegisterPurchase() {
                 </div>
                 <button 
                   onClick={() => handleOpenModal(product)}
-                  style={styles.addBtn}
+                  style={{ ...styles.addBtn, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  ➕ Agregar Stock
+                  <Plus size={18} strokeWidth={2.5} /> Agregar Stock
                 </button>
               </div>
             ))
@@ -231,11 +236,13 @@ function RegisterPurchase() {
         <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>📦</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <Package size={24} />
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Sumar al Inventario</h2>
               </div>
-              <button onClick={() => setShowModal(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowModal(false)} style={styles.closeBtn}>
+                <X size={24} />
+              </button>
             </div>
 
             <form onSubmit={handleConfirmPurchase} style={{ padding: '24px' }}>
@@ -295,11 +302,13 @@ function RegisterPurchase() {
         <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>🚪</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <LogOut size={24} />
                 <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
               </div>
-              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>
+                <X size={24} />
+              </button>
             </div>
             <div style={{ padding: '24px', textAlign: 'center' }}>
               <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>

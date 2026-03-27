@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { Sun, Moon, Plus, Users, User, UserPlus, Mail, LogOut, X, Home } from 'lucide-react';
 
 function FamilyGroups() {
   const [groups, setGroups] = useState([]);
@@ -125,7 +126,7 @@ function FamilyGroups() {
           </div>
           <div style={styles.navbarRight}>
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
-              {darkMode ? '☀️' : '🌙'}
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
           </div>
@@ -138,15 +139,17 @@ function FamilyGroups() {
             <h2 style={{ ...styles.pageTitle, color: theme.text }}>Tus Grupos</h2>
             <p style={{ color: theme.textMuted, marginTop: '5px' }}>Gestiona los inventarios compartidos.</p>
           </div>
-          <button onClick={() => setShowCreateModal(true)} style={styles.primaryActionBtn}>
-            ➕ Nuevo Grupo
+          <button onClick={() => setShowCreateModal(true)} style={{ ...styles.primaryActionBtn, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Plus size={18} strokeWidth={2.5} /> Nuevo Grupo
           </button>
         </div>
 
         <div style={styles.grid}>
           {groups.length === 0 ? (
             <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, gridColumn: '1 / -1', border: `1px solid ${theme.border}` }}>
-              <span style={{ fontSize: '60px', display: 'block', marginBottom: '15px' }}>🏠</span>
+              <span style={{ display: 'block', marginBottom: '15px', color: theme.textMuted }}>
+                <Home size={60} strokeWidth={1.5} />
+              </span>
               <h3 style={{ color: theme.text, fontSize: '1.5rem', marginBottom: '10px' }}>No tienes grupos todavía</h3>
               <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>Crea un grupo para compartir tu inventario.</p>
             </div>
@@ -163,8 +166,8 @@ function FamilyGroups() {
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {group.members_detail && group.members_detail.map((member, index) => (
                       <li key={index} style={{ color: theme.text, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ backgroundColor: theme.inputBg, padding: '4px 8px', borderRadius: '6px', fontSize: '14px', border: `1px solid ${theme.border}` }}>
-                          👤 {member.username === username ? `Tú (${member.username})` : member.username}
+                        <span style={{ backgroundColor: theme.inputBg, padding: '4px 8px', borderRadius: '6px', fontSize: '14px', border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <User size={14} /> {member.username === username ? `Tú (${member.username})` : member.username}
                         </span>
                       </li>
                     ))}
@@ -174,11 +177,12 @@ function FamilyGroups() {
                 <div style={{ padding: '0 20px 20px' }}>
                   <button 
                     onClick={() => openAddMemberModal(group._id)}
-                    style={{ ...styles.addMemberBtn, backgroundColor: theme.inputBg, color: theme.text, border: `2px dashed ${theme.border}` }}
+                    style={{ ...styles.addMemberBtn, backgroundColor: theme.inputBg, color: theme.text, border: `2px dashed ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
-                    ➕ Invitar Usuario
+                    <UserPlus size={16} /> Invitar Usuario
                   </button>
                 </div>
+
               </div>
             ))
           )}
@@ -189,11 +193,11 @@ function FamilyGroups() {
         <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>🏠</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <Users size={24} />
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Crear Grupo Familiar</h2>
               </div>
-              <button onClick={() => setShowCreateModal(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowCreateModal(false)} style={styles.closeBtn}><X size={24} /></button>
             </div>
             <form onSubmit={handleCreateGroup} style={{ padding: '24px' }}>
               <div style={{ marginBottom: '24px' }}>
@@ -229,11 +233,11 @@ function FamilyGroups() {
         <div style={styles.modalOverlay} onClick={() => setShowAddMemberModal(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>✉️</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <Mail size={24} />
                 <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Invitar Miembro</h2>
               </div>
-              <button onClick={() => setShowAddMemberModal(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowAddMemberModal(false)} style={styles.closeBtn}><X size={24} /></button>
             </div>
             <form onSubmit={handleAddMember} style={{ padding: '24px' }}>
               <div style={{ marginBottom: '24px' }}>
@@ -254,11 +258,11 @@ function FamilyGroups() {
         <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
           <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>🚪</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+                <LogOut size={24} />
                 <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
               </div>
-              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>✕</button>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}><X size={24} /></button>
             </div>
             <div style={{ padding: '24px', textAlign: 'center' }}>
               <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>

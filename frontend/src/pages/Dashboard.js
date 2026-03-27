@@ -4,7 +4,7 @@ import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Package, Sun, Moon, LogOut, Plus, ShoppingCart, 
-  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check 
+  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X
 } from 'lucide-react';
 
 function Dashboard() {
@@ -427,9 +427,10 @@ function Dashboard() {
                 )}
               </div>
 
+              {/* botones de productos */}
               <div style={styles.cardActions}>
                 <button onClick={() => handleDecrease(product._id, product.nombre)} disabled={product.cantidad === 0} style={{ ...styles.actionBtn, ...styles.actionBtnUse, opacity: product.cantidad === 0 ? 0.5 : 1 }}>
-                  ➖
+                  <Minus size={16} />
                 </button>
                 <button 
                   onClick={() => toggleShoppingList(product)} 
@@ -441,13 +442,13 @@ function Dashboard() {
                     cursor: processingListId === product._id ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {product.en_lista_compras ? '✓' : '🛒'}
+                  {product.en_lista_compras ? <Check size={16} /> : <ShoppingCart size={16} />}
                 </button>
                 <button onClick={() => openEditModal(product)} style={{ ...styles.actionBtn, backgroundColor: theme.inputBg, color: theme.text, border: `1px solid ${theme.border}` }}>
-                  ✏️
+                  <Edit2 size={16} />
                 </button>
                 <button onClick={() => handleDelete(product._id)} style={{ ...styles.actionBtn, ...styles.actionBtnDelete }}>
-                  🗑️
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
@@ -460,11 +461,13 @@ function Dashboard() {
     <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
         <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', margin: 0, borderBottom: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '24px' }}>📦</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+              <Package size={24} />
               <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Nuevo Producto</h2>
             </div>
-            <button onClick={() => setShowModal(false)} style={styles.closeBtn}>✕</button>
+            <button onClick={() => setShowModal(false)} style={styles.closeBtn}>
+              <X size={24} />
+            </button>
         </div>
 
         <form onSubmit={handleSubmit} style={{ ...styles.modalForm, padding: '24px' }}>
@@ -477,7 +480,7 @@ function Dashboard() {
               <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Grupo asignado</label>
               <select className="custom-input custom-select" value={formData.owner_id || activeGroup} onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })} style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} required>
                 {groups.map(group => (
-                  <option key={group._id} value={group._id}>👥 {group.nombre}</option>
+                  <option key={group._id} value={group._id}>{group.nombre}</option>
                 ))}
               </select>
             </div>
@@ -569,11 +572,13 @@ function Dashboard() {
     <div style={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
         <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', margin: 0, borderBottom: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '24px' }}>✏️</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+              <Edit2 size={24} />
               <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Editar Producto</h2>
             </div>
-            <button onClick={() => setShowEditModal(false)} style={styles.closeBtn}>✕</button>
+            <button onClick={() => setShowEditModal(false)} style={styles.closeBtn}>
+              <X size={24} />
+            </button>
          </div>
 
         <form onSubmit={handleEditSubmit} style={{ ...styles.modalForm, padding: '24px' }}>
