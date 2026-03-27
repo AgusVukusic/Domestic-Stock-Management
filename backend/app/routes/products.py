@@ -35,6 +35,7 @@ class ProductUpdate(BaseModel):
     categoria: Optional[str] = None
     notas: Optional[str] = None
     stock_min: Optional[int] = None
+    ultimo_precio: Optional[float] = None
 
 # Crear producto
 @router.post("/", response_model=ProductInDB)

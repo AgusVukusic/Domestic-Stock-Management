@@ -128,7 +128,8 @@ function Dashboard() {
         cantidad: editingProduct.cantidad,
         categoria: editingProduct.categoria,
         stock_min: editingProduct.stock_min,
-        notas: editingProduct.notas
+        notas: editingProduct.notas,
+        ultimo_precio: parseFloat(editingProduct.ultimo_precio) || 0
       };
       await productsAPI.update(editingProduct._id, updateData);
       setShowEditModal(false);
@@ -565,17 +566,8 @@ function Dashboard() {
             </div>
 
             <div style={{ ...styles.formRow, display: 'flex', gap: '16px', marginBottom: '20px' }}>
-              <div style={{...styles.formGroup, flex: 1}}>
-                  <label style={{ ...styles.label, color: theme.textMuted, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock actual</label>
-                  <input 
-                    type="number" 
-                    className="custom-input" 
-                    value={editingProduct.cantidad} 
-                    disabled 
-                    style={{ backgroundColor: theme.background, color: theme.textMuted, borderColor: theme.border, cursor: 'not-allowed', opacity: 0.7 }} 
-                    title="El stock se modifica sumando o restando desde los botones"
-                  />
-              </div>
+              
+              {/* El Stock Mínimo pasa a la izquierda */}
               <div style={{...styles.formGroup, flex: 1}}>
                   <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Stock mínimo</label>
                   <input 
@@ -589,6 +581,23 @@ function Dashboard() {
                     placeholder="0" 
                   />
               </div>
+
+              {/* El Precio Unitario toma el lugar de la derecha */}
+              <div style={{...styles.formGroup, flex: 1}}>
+                  <label style={{ ...styles.label, color: theme.text, display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '0.9rem' }}>Precio Unit. ($)</label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    min="0"
+                    className="custom-input" 
+                    value={editingProduct.ultimo_precio || ''} 
+                    onFocus={(e) => e.target.select()} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, ultimo_precio: e.target.value })} 
+                    style={{ backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }} 
+                    placeholder="Opcional" 
+                  />
+              </div>
+
             </div>
 
             <div style={{...styles.formGroup, marginBottom: '20px'}}>
