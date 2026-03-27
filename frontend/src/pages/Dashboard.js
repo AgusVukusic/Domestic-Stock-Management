@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { 
+  Package, Sun, Moon, LogOut, Plus, ShoppingCart, 
+  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check 
+} from 'lucide-react';
 
 function Dashboard() {
   const [products, setProducts] = useState([]);
@@ -192,6 +196,14 @@ function Dashboard() {
     return { backgroundColor: '#8C7AE6', color: 'white' };
   };
 
+  //Funcion para generar un circulo de alerta
+  const getAlertDot = (cantidad) => {
+    if (cantidad === 0) {
+      return <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#dc3545', boxShadow: '0 0 8px rgba(220, 53, 69, 0.4)' }} title="Sin stock" />;
+    }
+    return <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ffc107', boxShadow: '0 0 8px rgba(255, 193, 7, 0.4)' }} title="Stock bajo" />;
+  };
+
   const theme = darkMode ? darkTheme : lightTheme;
 
   let displayedProducts = products.filter(p => p.owner_id === activeGroup);
@@ -241,16 +253,22 @@ function Dashboard() {
 
       <nav style={{ ...styles.navbar, backgroundColor: theme.navbarBg, borderBottom: `1px solid ${theme.border}` }}>
         <div style={styles.navbarContent}>
+          {/* Logo */}
           <div style={styles.navbarLeft}>
-            <h1 style={{ ...styles.logo, color: theme.text }}>📦 Stock App</h1>
+            <h1 style={{ ...styles.logo, color: theme.text, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Package size={28} color="#8C7AE6" /> Stock App
+            </h1>
           </div>
+
+          {/* Botones derechos */}
           <div style={styles.navbarRight}>
-      
             <button onClick={toggleTheme} style={{ ...styles.themeBtn, backgroundColor: theme.cardBg, color: theme.text, border: `1px solid ${theme.border}` }}>
-              {darkMode ? '☀️' : '🌙'}
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <span style={{ ...styles.username, color: theme.textMuted }}>👤 {username}</span>
-            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
+            <span style={{ ...styles.username, color: theme.textMuted }}>{username}</span>
+            <button onClick={handleLogoutClick} style={{...styles.logoutBtn, display: 'flex', alignItems: 'center', gap: '6px'}}>
+              <LogOut size={14} /> Salir
+            </button>
           </div>
         </div>
       </nav>
@@ -270,17 +288,16 @@ function Dashboard() {
             }} 
             style={styles.primaryActionBtn}
           >
-            <span style={styles.btnIcon}>➕</span> Nuevo Producto
+            <Plus size={18} strokeWidth={2.5} /> Nuevo Producto
           </button>
           <button onClick={() => navigate('/register-purchase')} style={{ ...styles.secondaryActionBtn, backgroundColor: theme.cardBg, color: theme.text, border: `2px solid ${theme.border}` }}>
-            <span style={styles.btnIcon}>🛒</span> Registrar Compra
+            <ShoppingCart size={18} /> Registrar Compra
           </button>
           <button onClick={() => navigate('/groups')} style={{ ...styles.secondaryActionBtn, backgroundColor: theme.cardBg, color: theme.text, border: `2px solid ${theme.border}` }}>
-            <span style={styles.btnIcon}>👥</span> Grupos Familiares
+            <Users size={18} /> Grupos Familiares
           </button>
           <button onClick={() => navigate('/shopping-list')} style={styles.successActionBtn}>
-            <span style={styles.btnIcon}>📋</span> Lista de Compras
-           
+            <ClipboardList size={18} /> Lista de Compras
             <span style={styles.badge}>{products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length}</span>
           </button>
         </div>
@@ -312,7 +329,9 @@ function Dashboard() {
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
           <div style={styles.controlsContainer}>
           <div style={styles.searchContainer}>
-            <span style={{...styles.searchIcon, color: theme.textMuted}}>🔍</span>
+            <span style={{...styles.searchIcon, color: theme.textMuted}}>
+              <Search size={18} />
+            </span>
             <input
               type="text"
               placeholder="Buscar productos..."
@@ -332,7 +351,7 @@ function Dashboard() {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="">🏷️ Filtrar categorias</option>
+              <option value="">Filtrar categorias</option>
               {groupCategories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -347,10 +366,10 @@ function Dashboard() {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="name-asc">🔤 A-Z</option>
-              <option value="name-desc">🔠 Z-A</option>
-              <option value="stock-asc">📈 Stock (Asc)</option>
-              <option value="stock-desc">📉 Stock (Desc)</option>
+              <option value="name-asc">A-Z</option>
+              <option value="name-desc">Z-A</option>
+              <option value="stock-asc">Stock (Asc)</option>
+              <option value="stock-desc">Stock (Desc)</option>
             </select>
           </div>
         </div>
@@ -392,9 +411,7 @@ function Dashboard() {
           
                 <div style={styles.cardHeaderRow}>
                   <h5 style={{ ...styles.cardHeaderTitle, color: theme.text }}>{product.nombre}</h5>
-                  {product.cantidad <= product.stock_min && (
-                    <span style={styles.alertDot}>{product.cantidad === 0 ? '🔴' : '🟡'}</span>
-                  )}
+                  {product.cantidad <= product.stock_min && getAlertDot(product.cantidad)}
                 </div>
                 
                 <div style={styles.cardMetaRow}>
