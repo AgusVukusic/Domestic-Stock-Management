@@ -44,7 +44,11 @@ function ShoppingList() {
       setProducts(productsRes.data);
       setGroups(groupsRes.data);
       
-      if (groupsRes.data.length > 0 && !activeGroup) {
+      // Leemos el grupo guardado en el Dashboard
+      const savedGroup = localStorage.getItem('lastActiveGroup');
+      if (savedGroup && groupsRes.data.some(g => g._id === savedGroup)) {
+        setActiveGroup(savedGroup);
+      } else if (groupsRes.data.length > 0) {
         setActiveGroup(groupsRes.data[0]._id);
       }
     } catch (error) {
@@ -198,7 +202,10 @@ function ShoppingList() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <select
                 value={activeGroup}
-                onChange={(e) => setActiveGroup(e.target.value)}
+                onChange={(e) => {
+                  setActiveGroup(e.target.value);
+                  localStorage.setItem('lastActiveGroup', e.target.value); // Guardamos la elección
+                }}
                 style={{
                   flex: 1, padding: '10px 16px', borderRadius: '10px', border: `2px solid ${theme.border}`,
                   backgroundColor: theme.cardBg, color: theme.text, fontWeight: '600', fontSize: '15px',
