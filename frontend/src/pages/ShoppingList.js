@@ -162,7 +162,7 @@ function ShoppingList() {
   }
 
   return (
-    <div className="page-container animate-slide-up">
+    <div className="page-container">
       <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
         <div className="shopping-header">
           <div className="list-title-row">

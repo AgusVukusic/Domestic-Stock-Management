@@ -83,7 +83,7 @@ function FamilyGroups() {
   }
 
   return (
-    <div className="page-container animate-slide-up">
+    <div className="page-container">
 
       <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' }}>

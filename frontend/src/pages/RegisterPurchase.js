@@ -149,7 +149,7 @@ function RegisterPurchase() {
   }
 
   return (
-    <div className="page-container animate-slide-up">
+    <div className="page-container">
       <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 'var(--spacing-xl)', gap: '15px' }}>
           <div>

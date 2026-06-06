@@ -219,7 +219,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="page-container animate-slide-up">
+    <div className="page-container">
       <div className="dashboard-header" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: 'var(--spacing-xl)' }}>
         <div style={{ paddingRight: '100px' }}>
           <h2 style={{ fontSize: '2rem', margin: 0 }}>Inventario</h2>
