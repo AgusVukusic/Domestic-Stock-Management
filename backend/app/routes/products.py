@@ -201,7 +201,6 @@ async def scan_receipt(
         raise HTTPException(status_code=500, detail="La API Key de Gemini no está configurada en el servidor (.env).")
     
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
     
     try:
         contents = await file.read()
@@ -224,7 +223,20 @@ async def scan_receipt(
         Si no detectas productos, devuelve [].
         """
         
-        response = model.generate_content([prompt, image])
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            response = model.generate_content([prompt, image])
+        except Exception as e:
+            if "404" in str(e):
+                try:
+                    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+                    response = model.generate_content([prompt, image])
+                except Exception:
+                    model = genai.GenerativeModel('gemini-pro-vision')
+                    response = model.generate_content([prompt, image])
+            else:
+                raise e
+        
         text = response.text.strip()
         
         if "```json" in text:
