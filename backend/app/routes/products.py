@@ -266,7 +266,7 @@ async def scan_receipt(
         Si no detectas productos, devuelve [].
         """
         
-        model_names = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision', 'gemini-1.0-pro-vision-latest']
+        model_names = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-pro-vision']
         response = None
         errors = []
         for model_name in model_names:
@@ -278,7 +278,12 @@ async def scan_receipt(
                 errors.append(f"{model_name}: {str(e)}")
                 
         if not response:
-            raise Exception(f"No se encontró un modelo válido. Errores: {' | '.join(errors)}")
+            try:
+                available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                available_str = ", ".join(available)
+            except Exception as e:
+                available_str = f"Error listing models: {str(e)}"
+            raise Exception(f"No se encontró un modelo válido. Modelos disponibles en el servidor: {available_str}. Errores: {' | '.join(errors)}")
         
         text = response.text.strip()
         
