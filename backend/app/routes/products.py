@@ -224,15 +224,15 @@ async def scan_receipt(
         """
         
         try:
-            model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            model = genai.GenerativeModel('gemini-3.5-flash')
             response = model.generate_content([prompt, image])
         except Exception as e:
             if "404" in str(e):
                 try:
-                    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+                    model = genai.GenerativeModel('gemini-flash-latest')
                     response = model.generate_content([prompt, image])
                 except Exception:
-                    model = genai.GenerativeModel('gemini-pro-vision')
+                    model = genai.GenerativeModel('gemini-2.5-flash')
                     response = model.generate_content([prompt, image])
             else:
                 raise e
