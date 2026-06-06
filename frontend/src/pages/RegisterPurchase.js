@@ -124,7 +124,9 @@ function RegisterPurchase() {
         toast.error('No se detectaron productos en el ticket.', { id: toastId });
       }
     } catch (error) {
-      toast.error('Error al analizar el ticket. Revisa la foto o la API Key.', { id: toastId });
+      console.error(error);
+      const errMsg = error.response?.data?.detail || 'Error al analizar el ticket. Revisa la foto o la API Key';
+      toast.error(errMsg, { id: toastId });
     } finally {
       setIsScanningReceipt(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
