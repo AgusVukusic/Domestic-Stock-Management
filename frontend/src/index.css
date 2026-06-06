@@ -194,7 +194,7 @@ input, textarea, select {
 }
 
 .page-container {
-  padding: calc(var(--spacing-xl) + 20px) var(--spacing-md) var(--spacing-xl);
+  padding: calc(env(safe-area-inset-top, 20px) + 80px) var(--spacing-md) var(--spacing-xl);
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
