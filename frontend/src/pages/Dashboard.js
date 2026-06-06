@@ -152,31 +152,44 @@ function Dashboard() {
   };
 
   const handleDecrease = async (id, nombre) => {
+    const previousProducts = [...products];
+    
+    // Actualización optimista instantánea
+    setProducts(products.map(p => 
+      p._id === id ? { ...p, cantidad: Math.max(0, p.cantidad - 1) } : p
+    ));
+
     try {
       await productsAPI.decreaseStock(id, 1);
-      loadData();
-      toast.success(`1 unidad de ${nombre} descontada`);
+      // Sincronización silenciosa en segundo plano
+      productsAPI.getAll().then(res => setProducts(res.data)).catch(() => {});
     } catch (error) {
-      toast.error('Error al actualizar el stock');
+      // Reversión si hay error
+      setProducts(previousProducts);
+      toast.error('Error de conexión. Se revirtió el descuento.');
     }
   };
 
   const toggleShoppingList = async (product) => {
-    setProcessingListId(product._id);
-    const toastId = toast.loading('Actualizando lista...');
+    const previousProducts = [...products];
+    const isAdding = !product.en_lista_compras;
+    
+    // Actualización optimista instantánea
+    setProducts(products.map(p => 
+      p._id === product._id ? { ...p, en_lista_compras: isAdding } : p
+    ));
+
     try {
-      if (product.en_lista_compras) {
-        await productsAPI.removeFromShoppingList(product._id);
-        toast.success(`${product.nombre} quitado de la lista`, { id: toastId });
-      } else {
+      if (isAdding) {
         await productsAPI.addToShoppingList(product._id);
-        toast.success(`${product.nombre} agregado a las compras`, { id: toastId });
+        toast.success(`Agregado a la lista de compras`, { duration: 2000 });
+      } else {
+        await productsAPI.removeFromShoppingList(product._id);
       }
-      loadData();
+      productsAPI.getAll().then(res => setProducts(res.data)).catch(() => {});
     } catch (error) {
-      toast.error('Error al actualizar lista de compras', { id: toastId });
-    } finally {
-      setProcessingListId(null);
+      setProducts(previousProducts);
+      toast.error('Error de conexión al actualizar la lista');
     }
   };
 
