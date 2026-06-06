@@ -207,6 +207,9 @@ async def scan_receipt(
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
         
+        # Reducir tamaño de la imagen para evitar problemas de memoria (OOM) y acelerar el escaneo
+        image.thumbnail((1024, 1024))
+        
         prompt = """
         Eres un asistente experto en contabilidad. Extrae los productos de este ticket de compra.
         Devuelve un JSON estrictamente con la siguiente estructura de arreglo, sin texto adicional ni bloques de markdown (ni ```json):
