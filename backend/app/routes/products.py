@@ -273,7 +273,7 @@ async def scan_receipt(
         for model_name in model_names:
             try:
                 model = genai.GenerativeModel(model_name)
-                response = model.generate_content([prompt, image])
+                response = await model.generate_content_async([prompt, image])
                 break
             except Exception as e:
                 error_msg = str(e)
