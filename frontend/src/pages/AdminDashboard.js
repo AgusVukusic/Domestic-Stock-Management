@@ -8,7 +8,6 @@ import './AdminDashboard.css';
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -17,17 +16,11 @@ function AdminDashboard() {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-    }
   }, []);
 
   const fetchUsers = async () => {
@@ -75,26 +68,7 @@ function AdminDashboard() {
     }
   };
 
-  const toggleTheme = () => {
-    const newTheme = !darkMode;
-    setDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    if (newTheme) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  };
 
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = () => {
-    localStorage.clear();
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    navigate('/login');
-  };
 
   if (loading) {
     return (
@@ -114,12 +88,6 @@ function AdminDashboard() {
             </h1>
           </div>
           <div className="navbar-right">
-            <button onClick={toggleTheme} className="theme-btn">
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button onClick={handleLogoutClick} className="logout-btn">
-              <LogOut size={14} /> Salir
-            </button>
           </div>
         </div>
       </nav>
@@ -237,24 +205,7 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* Modal de Confirmación de Cierre de Sesión */}
-      {showLogoutConfirm && (
-        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'var(--danger)' }}>
-              <h2>🚪 Cerrar Sesión</h2>
-              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close"><X size={24} /></button>
-            </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
-                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

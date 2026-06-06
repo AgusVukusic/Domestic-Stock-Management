@@ -6,8 +6,8 @@ import './Navigation.css';
 const Navigation = () => {
   const location = useLocation();
 
-  // Hide nav on auth pages
-  if (['/login', '/register', '/'].includes(location.pathname)) return null;
+  // Hide nav on auth and admin pages
+  if (['/login', '/register', '/'].includes(location.pathname) || location.pathname.startsWith('/admin')) return null;
 
   return (
     <nav className="navigation">
