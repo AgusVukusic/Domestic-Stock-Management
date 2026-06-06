@@ -4,9 +4,10 @@ import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Package, Sun, Moon, LogOut, Plus, ShoppingCart, 
-  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X
+  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode
 } from 'lucide-react';
 import './Dashboard.css';
+import BarcodeScanner from '../components/BarcodeScanner';
 
 function Dashboard() {
   const [products, setProducts] = useState([]);
@@ -32,7 +33,11 @@ function Dashboard() {
     notas: '',
     owner_type: 'group',
     owner_id: '',
+    codigo_barras: '',
   });
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [scanningFor, setScanningFor] = useState(null); // 'search', 'create', 'edit'
+  
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
 
@@ -126,7 +131,8 @@ function Dashboard() {
         categoria: editingProduct.categoria,
         stock_min: editingProduct.stock_min,
         notas: editingProduct.notas,
-        ultimo_precio: parseFloat(editingProduct.ultimo_precio) || 0
+        ultimo_precio: parseFloat(editingProduct.ultimo_precio) || 0,
+        codigo_barras: editingProduct.codigo_barras
       };
       await productsAPI.update(editingProduct._id, updateData);
       setShowEditModal(false);
@@ -135,6 +141,26 @@ function Dashboard() {
       toast.success('Producto actualizado correctamente', { id: toastId });
     } catch (error) {
       toast.error('Error al actualizar el producto', { id: toastId });
+    }
+  };
+
+  const handleBarcodeScan = async (decodedText) => {
+    setShowBarcodeScanner(false);
+    if (scanningFor === 'create') {
+      setFormData({ ...formData, codigo_barras: decodedText });
+      toast.success('Código escaneado: ' + decodedText);
+    } else if (scanningFor === 'edit' && editingProduct) {
+      setEditingProduct({ ...editingProduct, codigo_barras: decodedText });
+      toast.success('Código escaneado: ' + decodedText);
+    } else if (scanningFor === 'search') {
+      try {
+        const res = await productsAPI.getByBarcode(decodedText);
+        if (res.data) {
+          setSearchTerm(res.data.nombre);
+        }
+      } catch (error) {
+        toast.error('Producto no encontrado');
+      }
     }
   };
 
@@ -287,15 +313,25 @@ function Dashboard() {
 
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
           <div className="controls-container">
-            <div className="search-container">
-              <span className="search-icon"><Search size={18} /></span>
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-input search-input"
-              />
+            <div className="search-container" style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <span className="search-icon"><Search size={18} /></span>
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="form-input search-input"
+                  style={{ paddingLeft: '45px' }}
+                />
+              </div>
+              <button 
+                onClick={() => { setScanningFor('search'); setShowBarcodeScanner(true); }} 
+                className="btn btn-secondary" 
+                style={{ padding: '0 15px' }}
+              >
+                <ScanBarcode size={20} />
+              </button>
             </div>
 
             <div className="filters-row">
@@ -473,6 +509,16 @@ function Dashboard() {
                 <textarea className="form-input" value={formData.notas} onChange={(e) => setFormData({ ...formData, notas: e.target.value })} style={{ minHeight: '80px', resize: 'vertical' }} placeholder="Detalles..." />
               </div>
 
+              <div className="form-group">
+                <label className="form-label">Código de Barras (opcional)</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input type="text" className="form-input" value={formData.codigo_barras || ''} onChange={(e) => setFormData({ ...formData, codigo_barras: e.target.value })} placeholder="Ej: 779123456789" />
+                  <button type="button" onClick={() => { setScanningFor('create'); setShowBarcodeScanner(true); }} className="btn btn-secondary">
+                    <ScanBarcode size={20} />
+                  </button>
+                </div>
+              </div>
+
               <div className="modal-footer">
                 <button type="button" onClick={() => setShowModal(false)} className="btn btn-secondary">Cancelar</button>
                 <button type="submit" disabled={isCreating} className="btn btn-primary">
@@ -529,6 +575,16 @@ function Dashboard() {
                 <textarea className="form-input" value={editingProduct.notas || ''} onChange={(e) => setEditingProduct({ ...editingProduct, notas: e.target.value })} style={{ minHeight: '80px', resize: 'vertical' }} placeholder="Detalles..." />
               </div>
 
+              <div className="form-group">
+                <label className="form-label">Código de Barras (opcional)</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input type="text" className="form-input" value={editingProduct.codigo_barras || ''} onChange={(e) => setEditingProduct({ ...editingProduct, codigo_barras: e.target.value })} placeholder="Ej: 779123456789" />
+                  <button type="button" onClick={() => { setScanningFor('edit'); setShowBarcodeScanner(true); }} className="btn btn-secondary">
+                    <ScanBarcode size={20} />
+                  </button>
+                </div>
+              </div>
+
               <div className="modal-footer">
                 <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-secondary">Cancelar</button>
                 <button type="submit" className="btn btn-primary">Actualizar</button>
@@ -556,6 +612,8 @@ function Dashboard() {
           </div>
         </div>
       )}
+
+      {showBarcodeScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowBarcodeScanner(false)} />}
     </div>
   );
 }

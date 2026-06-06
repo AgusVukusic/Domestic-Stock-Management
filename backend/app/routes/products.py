@@ -1,6 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query, status, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends, File, UploadFile
 from pydantic import BaseModel
 from typing import List, Optional
+import os
+import json
+import io
+from PIL import Image
+import google.generativeai as genai
 from ..models.product import ProductInDB
 from ..models.user import UserInDB
 from ..utils.product_db import (
@@ -13,7 +18,8 @@ from ..utils.product_db import (
     increase_stock,
     add_to_shopping_list,
     remove_from_shopping_list,
-    get_shopping_list
+    get_shopping_list,
+    get_product_by_barcode
 )
 from ..utils.auth_middleware import get_current_user
 
@@ -28,6 +34,7 @@ class ProductCreate(BaseModel):
     stock_min: int
     owner_type: Optional[str] = "user"  # Por defecto es personal
     owner_id: Optional[str] = None      # Si es group, acá viene el ID del grupo
+    codigo_barras: Optional[str] = None
 
 class ProductUpdate(BaseModel):
     nombre: Optional[str] = None
@@ -36,6 +43,7 @@ class ProductUpdate(BaseModel):
     notas: Optional[str] = None
     stock_min: Optional[int] = None
     ultimo_precio: Optional[float] = None
+    codigo_barras: Optional[str] = None
 
 # Crear producto
 @router.post("/", response_model=ProductInDB)
@@ -65,7 +73,8 @@ async def create_new_product(
         "owner_type": owner_type,
         "owner_id": owner_id,
         "notas": product.notas,
-        "en_lista_compras": False
+        "en_lista_compras": False,
+        "codigo_barras": product.codigo_barras
     }
     
     new_product = await create_product(product_data)
@@ -169,3 +178,66 @@ async def remove_product_from_shopping_list(
 async def view_shopping_list(current_user: UserInDB = Depends(get_current_user)):
     shopping_list = await get_shopping_list(current_user.id)
     return shopping_list
+
+# Obtener producto por código de barras
+@router.get("/barcode/{barcode}", response_model=ProductInDB)
+async def get_by_barcode(
+    barcode: str,
+    current_user: UserInDB = Depends(get_current_user)
+):
+    product = await get_product_by_barcode(barcode, current_user.id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return product
+
+# Escanear ticket con Gemini
+@router.post("/receipt-scan")
+async def scan_receipt(
+    file: UploadFile = File(...),
+    current_user: UserInDB = Depends(get_current_user)
+):
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="La API Key de Gemini no está configurada en el servidor (.env).")
+    
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))
+        
+        prompt = """
+        Eres un asistente experto en contabilidad. Extrae los productos de este ticket de compra.
+        Devuelve un JSON estrictamente con la siguiente estructura de arreglo, sin texto adicional ni bloques de markdown (ni ```json):
+        [
+          {
+            "nombre": "Nombre claro del producto (corrige abreviaturas si puedes)",
+            "cantidad": 1,
+            "precio_unitario": 100.50
+          }
+        ]
+        Si el ticket indica una cantidad mayor a 1 para un producto, divídelo para dar el precio unitario, o extrae la cantidad y el precio unitario que suele estar debajo. Asegúrate de que 'cantidad' sea entero y 'precio_unitario' flotante.
+        Si no detectas productos, devuelve [].
+        """
+        
+        response = model.generate_content([prompt, image])
+        text = response.text.strip()
+        
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            text = text.split("```")[1].split("```")[0].strip()
+            
+        try:
+            items = json.loads(text)
+        except json.JSONDecodeError:
+            print(f"Error parseando JSON de Gemini. Texto crudo: {text}")
+            raise HTTPException(status_code=500, detail="La IA devolvió un formato inválido. Intenta con otra foto más clara.")
+            
+        return {"items": items}
+        
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=f"Error al procesar la imagen: {str(e)}")

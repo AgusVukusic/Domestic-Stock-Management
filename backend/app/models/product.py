@@ -11,6 +11,7 @@ class Product(BaseModel):
     owner_id: str                   #ID del dueño (user o group)
     en_lista_compras: bool = False  #indica si el producto se encuentra en la lista de compras
     ultimo_precio: float = 0.0      #precio del producto en la ultima compra
+    codigo_barras: Optional[str] = None #Codigo de barras del producto
 
 class ProductInDB(Product):
     id: Optional[str] = Field(None, alias="_id")

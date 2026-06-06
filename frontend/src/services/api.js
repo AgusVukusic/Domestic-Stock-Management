@@ -58,6 +58,14 @@ export const productsAPI = {
   
   getShoppingList: () => api.get('/products/shopping-list/view'),
   
+  getByBarcode: (barcode) => api.get(`/products/barcode/${barcode}`),
+
+  scanReceipt: (formData) => api.post('/products/receipt-scan', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  
 };
 
 export const groupsAPI = {

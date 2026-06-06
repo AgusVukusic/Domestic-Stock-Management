@@ -121,15 +121,15 @@ function ShoppingList() {
 
     const groupName = groups.find(g => g._id === activeGroup)?.nombre || '';
 
-    let text = `🛒 LISTA DE COMPRAS - ${groupName.toUpperCase()}\n`;
+    let text = `🛒 *LISTA DE COMPRAS - ${groupName.toUpperCase()}*\n`;
     text += '━━━━━━━━━━━━━━\n\n';
 
     Object.keys(groupedByCategory).sort().forEach(category => {
-      text += `📌 ${category.toUpperCase()}\n`;
+      text += `📌 *${category.toUpperCase()}*\n`;
       text += '━━━━━━━━━━━━━━\n';
       
       groupedByCategory[category].forEach(product => {
-        text += `• ${product.nombre}\n`;
+        text += `• _${product.nombre}_\n`;
         text += `  Stock actual: ${product.cantidad} | Mínimo: ${product.stock_min}\n`;
         if (product.notas) text += `  Nota: ${product.notas}\n`;
         text += '\n';
@@ -138,10 +138,13 @@ function ShoppingList() {
     });
 
     text += `━━━━━━━━━━━━━━\n`;
-    text += `Total: ${displayedProducts.length} ${displayedProducts.length === 1 ? 'producto' : 'productos'}\n`;
+    text += `*Total: ${displayedProducts.length} ${displayedProducts.length === 1 ? 'producto' : 'productos'}*\n`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
 
     navigator.clipboard.writeText(text).then(() => {
-      toast.success('✓ Lista copiada al portapapeles!');
+      toast.success('✓ Abriendo WhatsApp y copiando al portapapeles!');
     }).catch(() => {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -149,7 +152,7 @@ function ShoppingList() {
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      toast.success('✓ Lista copiada al portapapeles!');
+      toast.success('✓ Abriendo WhatsApp y copiando al portapapeles!');
     });
   };
 
@@ -160,8 +163,26 @@ function ShoppingList() {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
+      <div className="page-container">
+        <nav className="navbar">
+          <div className="navbar-content">
+            <div className="navbar-left">
+              <div className="skeleton skeleton-text" style={{width: '80px', height: '30px', margin: 0}}></div>
+              <div className="skeleton skeleton-text" style={{width: '120px', height: '30px', marginLeft: '15px', margin: 0}}></div>
+            </div>
+            <div className="navbar-right" style={{ display: 'flex', gap: '10px' }}>
+              <div className="skeleton" style={{width: '30px', height: '30px', borderRadius: '50%'}}></div>
+              <div className="skeleton skeleton-text" style={{width: '80px', height: '30px', margin: 0}}></div>
+            </div>
+          </div>
+        </nav>
+        <div className="content-wrapper" style={{ maxWidth: '1200px', marginTop: '20px' }}>
+          <div className="skeleton skeleton-title"></div>
+          <div className="skeleton skeleton-text" style={{ width: '150px', marginBottom: '30px' }}></div>
+          <div className="product-grid" style={{ gridTemplateColumns: '1fr' }}>
+            {[1, 2, 3].map(i => <div key={i} className="skeleton skeleton-card" style={{ height: '140px' }}></div>)}
+          </div>
+        </div>
       </div>
     );
   }

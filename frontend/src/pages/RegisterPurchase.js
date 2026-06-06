@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { productsAPI, groupsAPI } from '../services/api';
-import { Sun, Moon, ShoppingCart, Search, Plus, Package, LogOut, X } from 'lucide-react';
+import { Sun, Moon, ShoppingCart, Search, Plus, Package, LogOut, X, ScanBarcode, Camera } from 'lucide-react';
 import './RegisterPurchase.css';
+import BarcodeScanner from '../components/BarcodeScanner';
 
 function RegisterPurchase() {
   const [products, setProducts] = useState([]);
@@ -18,6 +19,10 @@ function RegisterPurchase() {
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchasePrice, setPurchasePrice] = useState('');
+  
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [isScanningReceipt, setIsScanningReceipt] = useState(false);
+  const fileInputRef = useRef(null);
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -108,6 +113,51 @@ function RegisterPurchase() {
     navigate('/login');
   };
 
+  const handleBarcodeScan = async (decodedText) => {
+    setShowBarcodeScanner(false);
+    try {
+      const res = await productsAPI.getByBarcode(decodedText);
+      if (res.data) {
+        handleOpenModal(res.data);
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        toast.error('Producto no encontrado. Agrégalo desde el Dashboard primero.');
+      } else {
+        toast.error('Error al buscar código de barras');
+      }
+    }
+  };
+
+  const handleReceiptUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const toastId = toast.loading('Analizando ticket con IA...');
+    setIsScanningReceipt(true);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const res = await productsAPI.scanReceipt(formData);
+      const items = res.data.items;
+      
+      if (items && items.length > 0) {
+        toast.success(`Se detectaron ${items.length} productos!`, { id: toastId });
+        console.log("Items detectados: ", items);
+        // Implementación futura: Mostrar listado para confirmar.
+      } else {
+        toast.error('No se detectaron productos en el ticket.', { id: toastId });
+      }
+    } catch (error) {
+      toast.error('Error al analizar el ticket. Revisa la foto o la API Key.', { id: toastId });
+    } finally {
+      setIsScanningReceipt(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -179,18 +229,27 @@ function RegisterPurchase() {
             </select>
           </div>
 
-          <div style={{ position: 'relative', width: '100%' }}>
-            <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
-              <Search size={18} />
-            </span>
-            <input 
-              type="text" 
-              placeholder="Buscar producto..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="form-input"
-              style={{ paddingLeft: '45px' }}
-            />
+          <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
+                <Search size={18} />
+              </span>
+              <input 
+                type="text" 
+                placeholder="Buscar producto..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '45px' }}
+              />
+            </div>
+            <button onClick={() => setShowBarcodeScanner(true)} className="btn btn-secondary" title="Escanear Código" style={{ padding: '0 15px' }}>
+              <ScanBarcode size={20} />
+            </button>
+            <button onClick={() => fileInputRef.current?.click()} className="btn btn-primary" title="Escanear Ticket" disabled={isScanningReceipt} style={{ padding: '0 15px' }}>
+              <Camera size={20} />
+              <input type="file" ref={fileInputRef} onChange={handleReceiptUpload} accept="image/*" style={{ display: 'none' }} />
+            </button>
           </div>
         </div>
 
@@ -290,6 +349,8 @@ function RegisterPurchase() {
           </div>
         </div>
       )}
+
+      {showBarcodeScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowBarcodeScanner(false)} />}
     </div>
   );
 }

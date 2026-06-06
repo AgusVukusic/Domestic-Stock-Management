@@ -18,7 +18,8 @@ def product_helper(product) -> dict:
         "owner_type": product["owner_type"],
         "owner_id": product["owner_id"],
         "en_lista_compras": product.get("en_lista_compras", False),
-        "ultimo_precio": product.get("ultimo_precio", 0.0)
+        "ultimo_precio": product.get("ultimo_precio", 0.0),
+        "codigo_barras": product.get("codigo_barras", None)
     }
 
 async def get_access_query(user_id: str, product_id: str = None):
@@ -67,6 +68,17 @@ async def get_product(product_id: str, user_id: str):
     """Obtener un producto específico verificando permisos"""
     products_collection = get_products_collection()
     query = await get_access_query(user_id, product_id)
+    
+    product = await products_collection.find_one(query)
+    if product:
+        return product_helper(product)
+    return None
+
+async def get_product_by_barcode(barcode: str, user_id: str):
+    """Obtener un producto por código de barras verificando permisos"""
+    products_collection = get_products_collection()
+    query = await get_access_query(user_id)
+    query["codigo_barras"] = barcode
     
     product = await products_collection.find_one(query)
     if product:
