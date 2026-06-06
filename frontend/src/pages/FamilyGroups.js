@@ -16,7 +16,6 @@ function FamilyGroups() {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [newMemberUsername, setNewMemberUsername] = useState('');
-  const [newMemberUsername, setNewMemberUsername] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   const navigate = useNavigate();

@@ -23,8 +23,6 @@ function RegisterPurchase() {
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
   const fileInputRef = useRef(null);
-  
-  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {

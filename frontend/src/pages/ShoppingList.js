@@ -19,6 +19,7 @@ function ShoppingList() {
   const [purchasePrice, setPurchasePrice] = useState('');
   
   const [showPriceDetails, setShowPriceDetails] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadShoppingList();
@@ -349,8 +350,7 @@ function ShoppingList() {
           </div>
         </div>
       )}
-
-
+    </div>
   );
 }
 

@@ -4,7 +4,7 @@ import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Package, Plus, ShoppingCart, 
-  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode, TrendingUp
+  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode
 } from 'lucide-react';
 import './Dashboard.css';
 import BarcodeScanner from '../components/BarcodeScanner';
