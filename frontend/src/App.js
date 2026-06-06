@@ -7,6 +7,7 @@ import RegisterPurchase from './pages/RegisterPurchase';
 import FamilyGroups from './pages/FamilyGroups';
 import AdminDashboard from './pages/AdminDashboard';
 import Navigation from './components/Navigation';
+import TopBar from './components/TopBar';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
       <div className="app-layout">
         <Navigation darkMode={darkMode} toggleTheme={toggleTheme} />
         <main className="main-content">
+          <TopBar darkMode={darkMode} toggleTheme={toggleTheme} />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

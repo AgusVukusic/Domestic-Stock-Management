@@ -220,34 +220,41 @@ function Dashboard() {
 
   return (
     <div className="page-container animate-slide-up">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-xl)' }}>
-        <div>
+      <div className="dashboard-header" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: 'var(--spacing-xl)' }}>
+        <div style={{ paddingRight: '100px' }}>
           <h2 style={{ fontSize: '2rem', margin: 0 }}>Inventario</h2>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Gestiona tus productos y existencias</p>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px', fontSize: '0.9rem' }}>Gestiona tus productos y existencias</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>GRUPO ACTIVO</span>
-          <select
-            value={activeGroup}
-            onChange={(e) => {
-              setActiveGroup(e.target.value);
-              localStorage.setItem('lastActiveGroup', e.target.value);
-            }}
-            style={{ 
-              padding: '8px 16px', borderRadius: 'var(--radius-full)', 
-              background: 'var(--card-bg)', color: 'var(--text-primary)', 
-              border: '1px solid var(--border-color)', outline: 'none',
-              fontWeight: 600, boxShadow: 'var(--shadow-sm)'
-            }}
-          >
-            {groups.map(g => (
-              <option key={g._id} value={g._id}>{g.nombre}</option>
-            ))}
-          </select>
-        </div>
+        
+        {groups.length > 0 && (
+          <div style={{ 
+            display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--card-bg)', 
+            padding: '8px 12px', borderRadius: 'var(--radius-full)', boxShadow: 'var(--shadow-sm)', 
+            border: '1px solid var(--border-color)', width: 'fit-content' 
+          }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>GRUPO:</span>
+            <select
+              value={activeGroup}
+              onChange={(e) => {
+                setActiveGroup(e.target.value);
+                localStorage.setItem('lastActiveGroup', e.target.value);
+              }}
+              style={{ 
+                background: 'transparent', color: 'var(--text-primary)', 
+                border: 'none', outline: 'none',
+                fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                appearance: 'none', paddingRight: '10px'
+              }}
+            >
+              {groups.map(g => (
+                <option key={g._id} value={g._id}>{g.nombre}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-xl)' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: 'var(--spacing-xl)' }}>
         <button onClick={() => {
             if (groups.length === 0) {
               toast.error("Primero debes crear un Grupo Familiar");
@@ -257,22 +264,22 @@ function Dashboard() {
               setShowModal(true);
             }
           }} 
-          className="btn btn-primary" style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '8px', borderRadius: 'var(--radius-lg)' }}
+          className="btn btn-primary" style={{ padding: '12px 18px', borderRadius: 'var(--radius-full)', flex: '1 1 auto' }}
         >
-          <Plus size={24} /> 
-          <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Nuevo Producto</span>
+          <Plus size={18} /> 
+          <span style={{ fontSize: '0.95rem', whiteSpace: 'nowrap' }}>Nuevo Producto</span>
         </button>
         
-        <button onClick={() => navigate('/register-purchase')} className="btn btn-secondary" style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '8px', borderRadius: 'var(--radius-lg)' }}>
-          <ShoppingCart size={24} /> 
-          <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Ingresar Stock</span>
+        <button onClick={() => navigate('/register-purchase')} className="btn btn-secondary" style={{ padding: '12px 18px', borderRadius: 'var(--radius-full)', flex: '1 1 auto' }}>
+          <ShoppingCart size={18} /> 
+          <span style={{ fontSize: '0.95rem', whiteSpace: 'nowrap' }}>Ingresar Stock</span>
         </button>
         
-        <button onClick={() => navigate('/shopping-list')} className="btn btn-secondary" style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', borderRadius: 'var(--radius-lg)' }}>
-          <ClipboardList size={24} /> 
-          <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Lista Compras</span>
+        <button onClick={() => navigate('/shopping-list')} className="btn btn-secondary" style={{ padding: '12px 18px', borderRadius: 'var(--radius-full)', flex: '1 1 auto', position: 'relative' }}>
+          <ClipboardList size={18} /> 
+          <span style={{ fontSize: '0.95rem', whiteSpace: 'nowrap' }}>Lista Compras</span>
           {products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length > 0 && (
-            <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
+            <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold', border: '2px solid var(--bg-color)' }}>
               {products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length}
             </span>
           )}
