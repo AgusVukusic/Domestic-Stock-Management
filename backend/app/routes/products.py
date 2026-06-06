@@ -287,10 +287,16 @@ async def scan_receipt(
         for model_name in model_names:
             try:
                 model = genai.GenerativeModel(model_name)
-                response = model.generate_content([prompt, image_parts[0]])
+                response = model.generate_content(
+                    [prompt, image_parts[0]], 
+                    request_options={"retry": None}
+                )
                 break
             except Exception as e:
-                errors.append(f"{model_name}: {str(e)}")
+                error_msg = str(e)
+                if "429" in error_msg or "quota" in error_msg.lower():
+                    raise HTTPException(status_code=429, detail="Límite de usos de la Inteligencia Artificial alcanzado. Por favor, espera 1 minuto antes de escanear otro ticket.")
+                errors.append(f"{model_name}: {error_msg}")
                 
         if not response:
             try:
