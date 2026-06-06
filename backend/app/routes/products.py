@@ -233,10 +233,25 @@ async def scan_receipt(
             existing_categories_str = ", ".join(categorias) if categorias else "General"
 
         contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
         
-        # Reducir tamaño de la imagen para evitar problemas de memoria (OOM) y acelerar el escaneo
-        image.thumbnail((1024, 1024))
+        # Usar with para cerrar automáticamente y liberar memoria
+        with Image.open(io.BytesIO(contents)) as image:
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            # Reducir aún más para evitar OOM y acelerar Gemini
+            image.thumbnail((800, 800))
+            
+            # Guardar en memoria de forma optimizada
+            output_buffer = io.BytesIO()
+            image.save(output_buffer, format="JPEG", quality=85)
+            
+            # Pasar la imagen optimizada a Gemini usando el formato correcto de mime_type
+            image_parts = [
+                {
+                    "mime_type": "image/jpeg",
+                    "data": output_buffer.getvalue()
+                }
+            ]
         
         prompt = f"""
         Eres un asistente experto en contabilidad. Extrae los productos de este ticket de compra.
@@ -272,7 +287,7 @@ async def scan_receipt(
         for model_name in model_names:
             try:
                 model = genai.GenerativeModel(model_name)
-                response = model.generate_content([prompt, image])
+                response = model.generate_content([prompt, image_parts[0]])
                 break
             except Exception as e:
                 errors.append(f"{model_name}: {str(e)}")
@@ -296,7 +311,10 @@ async def scan_receipt(
             items = json.loads(text)
         except json.JSONDecodeError:
             print(f"Error parseando JSON de Gemini. Texto crudo: {text}")
-            raise HTTPException(status_code=500, detail="La IA devolvió un formato inválido. Intenta con otra foto más clara.")
+            raise HTTPException(status_code=500, detail="La IA devolvió un formato inválido. Intenta tomar la foto más de cerca o con mejor iluminación.")
+            
+        import gc
+        gc.collect() # Forzar recolección de basura después de procesar imágenes pesadas
             
         # PROCESAR ITEMS
         actualizados = 0
