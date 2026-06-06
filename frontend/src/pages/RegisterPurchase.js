@@ -129,8 +129,10 @@ function RegisterPurchase() {
       }
     } catch (error) {
       console.error(error);
-      const errMsg = error.response?.data?.detail || 'Error al analizar el ticket. Revisa la foto o la API Key';
-      toast.error(errMsg, { id: toastId });
+      const backendError = error.response?.data?.detail;
+      const fallbackMsg = 'Error al analizar el ticket. Revisa la foto o la API Key';
+      const errMsg = backendError ? `Error del servidor: ${backendError}` : fallbackMsg;
+      toast.error(errMsg, { id: toastId, duration: 8000 });
     } finally {
       setIsScanningReceipt(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
