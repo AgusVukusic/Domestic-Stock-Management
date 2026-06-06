@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { productsAPI, groupsAPI } from '../services/api';
 import { Sun, Moon, ShoppingCart, Search, Plus, Package, LogOut, X } from 'lucide-react';
+import './RegisterPurchase.css';
 
 function RegisterPurchase() {
   const [products, setProducts] = useState([]);
@@ -15,9 +16,7 @@ function RegisterPurchase() {
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
-  // Estado para bloquear el botón mientras procesamos la compra
   const [isPurchasing, setIsPurchasing] = useState(false);
-  // Estado para guardar el precio que pagamos (en blanco por defecto)
   const [purchasePrice, setPurchasePrice] = useState('');
   
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -34,7 +33,6 @@ function RegisterPurchase() {
 
   const loadData = async () => {
     try {
-      // Obtenemos tanto los productos como los grupos en paralelo
       const [productsRes, groupsRes] = await Promise.all([
         productsAPI.getAll(),
         groupsAPI.getAll()
@@ -43,7 +41,6 @@ function RegisterPurchase() {
       setProducts(productsRes.data);
       setGroups(groupsRes.data);
       
-      // Leemos el mismo grupo que dejamos seleccionado en el Dashboard
       const savedGroup = localStorage.getItem('lastActiveGroup');
       if (savedGroup && groupsRes.data.some(g => g._id === savedGroup)) {
         setActiveGroup(savedGroup);
@@ -61,12 +58,16 @@ function RegisterPurchase() {
     const newTheme = !darkMode;
     setDarkMode(newTheme);
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    if (newTheme) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
   };
 
   const handleOpenModal = (product) => {
     setSelectedProduct(product);
     setPurchaseQuantity(1);
-    // Limpiamos el precio cada vez que abrimos la ventana
     setPurchasePrice('');
     setShowModal(true);
   };
@@ -75,22 +76,17 @@ function RegisterPurchase() {
     e.preventDefault();
     if (!selectedProduct) return;
 
-    // Bloqueamos el botón en la interfaz para evitar dobles clics
     setIsPurchasing(true);
     const toastId = toast.loading('Registrando compra...');
 
     try {
-      // Convertimos el precio a número (si está vacío, mandamos 0)
       const priceToSend = parseFloat(purchasePrice) || 0;
-      // Enviamos la petición para sumar las unidades al inventario
       await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity, priceToSend);
       
-      // Verificamos si estaba en la lista de compras y, si es así, lo quitamos
       if (selectedProduct.en_lista_compras) {
         await productsAPI.removeFromShoppingList(selectedProduct._id);
       }
 
-      // Cerramos el modal, limpiamos la selección y recargamos los datos
       setShowModal(false);
       setSelectedProduct(null);
       loadData(); 
@@ -98,7 +94,6 @@ function RegisterPurchase() {
     } catch (error) {
       toast.error('Error al registrar la compra', { id: toastId });
     } finally {
-      // Liberamos el botón obligatoriamente, ya sea que la petición falló o tuvo éxito
       setIsPurchasing(false);
     }
   };
@@ -113,86 +108,79 @@ function RegisterPurchase() {
     navigate('/login');
   };
 
-  const filteredProducts = products.filter(product => 
-    product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.categoria.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const theme = darkMode ? darkTheme : lightTheme;
-
   if (loading) {
     return (
-      <div style={{ ...styles.loadingContainer, backgroundColor: theme.background }}>
-        <div style={styles.spinner}></div>
+      <div className="loading-container">
+        <div className="spinner"></div>
       </div>
     );
   }
 
-  // 1. Primero filtramos por el grupo seleccionado
   let displayedProducts = products.filter(p => p.owner_id === activeGroup);
 
-  // 2. Si el usuario escribió algo en el buscador, filtramos sobre esa lista
   if (searchTerm) {
     displayedProducts = displayedProducts.filter(p => 
-      p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.categoria.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }
 
   return (
-    <div style={{ ...styles.container, backgroundColor: theme.background }}>
-      <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
-        <div style={styles.navbarContent}>
-          <div style={styles.navbarLeft}>
-            <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>
+    <div className="page-container">
+      <nav className="navbar">
+        <div className="navbar-content">
+          <div className="navbar-left">
+            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginRight: '15px', padding: '6px 12px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
               Volver
             </button>
-            <h1 style={styles.logo}>StockApp</h1>
+            <h1 className="logo gradient-text">StockApp</h1>
           </div>
-          <div style={styles.navbarRight}>
-            <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
+          <div className="navbar-right">
+            <button onClick={toggleTheme} className="theme-btn">
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} className="logout-btn">
+              <LogOut size={14} /> Salir
+            </button>
           </div>
         </div>
       </nav>
 
-      <div style={styles.content}>
-        <div style={styles.headerSection}>
+      <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' }}>
           <div>
-            <h2 style={{ ...styles.pageTitle, color: theme.text }}>Registrar Compra</h2>
-            <p style={{ color: theme.textMuted, marginTop: '5px' }}>Busca el producto y suma stock rápidamente.</p>
+            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>Registrar Compra</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Busca el producto y suma stock rápidamente.</p>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
-          <span style={{ fontWeight: '600', color: theme.text, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShoppingCart size={18} /> Comprando para:
-          </span>
-          <select
-            value={activeGroup}
-            onChange={(e) => {
-              // Cambiamos el grupo actual y lo sincronizamos globalmente
-              setActiveGroup(e.target.value);
-              localStorage.setItem('lastActiveGroup', e.target.value);
-            }}
-            style={{ 
-              padding: '8px 12px', borderRadius: '10px', flex: 1,
-              backgroundColor: theme.inputBg, color: theme.text, 
-              border: `2px solid ${theme.border}`, outline: 'none' 
-            }}
-          >
-            {groups.map(g => (
-              <option key={g._id} value={g._id}>{g.nombre}</option>
-            ))}
-          </select>
-        </div>
+            <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShoppingCart size={18} /> Comprando para:
+            </span>
+            <select
+              value={activeGroup}
+              onChange={(e) => {
+                setActiveGroup(e.target.value);
+                localStorage.setItem('lastActiveGroup', e.target.value);
+              }}
+              style={{ 
+                padding: '8px 12px', borderRadius: '10px', flex: 1,
+                backgroundColor: 'var(--input-bg)', color: 'var(--text-primary)', 
+                border: '2px solid var(--border-color)', outline: 'none' 
+              }}
+            >
+              {groups.map(g => (
+                <option key={g._id} value={g._id}>{g.nombre}</option>
+              ))}
+            </select>
+          </div>
 
-          <div style={styles.searchContainer}>
-            <span style={{ ...styles.searchIcon, color: theme.textMuted }}>
+          <div style={{ position: 'relative', width: '100%' }}>
+            <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
               <Search size={18} />
             </span>
             <input 
@@ -200,29 +188,31 @@ function RegisterPurchase() {
               placeholder="Buscar producto..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }}
+              className="form-input"
+              style={{ paddingLeft: '45px' }}
             />
           </div>
         </div>
 
-        <div style={styles.grid}>
-          {filteredProducts.length === 0 ? (
-            <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, gridColumn: '1 / -1', border: `1px solid ${theme.border}` }}>
-              <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>No se encontraron productos.</p>
+        <div className="product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+          {displayedProducts.length === 0 ? (
+            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>No se encontraron productos.</p>
             </div>
           ) : (
             displayedProducts.map(product => (
-              <div key={product._id} style={{ ...styles.productCard, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
+              <div key={product._id} className="card card-hover product-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '15px' }}>
                 <div>
-                  <h3 style={{ ...styles.productName, color: theme.text }}>{product.nombre}</h3>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>{product.nombre}</h3>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                    <span style={styles.categoryBadge}>{product.categoria}</span>
-                    <span style={{ color: theme.textMuted, fontSize: '0.9rem' }}>Stock actual: <strong>{product.cantidad}</strong></span>
+                    <span className="category-badge">{product.categoria}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Stock actual: <strong>{product.cantidad}</strong></span>
                   </div>
                 </div>
                 <button 
                   onClick={() => handleOpenModal(product)}
-                  style={{ ...styles.addBtn, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
                 >
                   <Plus size={18} strokeWidth={2.5} /> Agregar Stock
                 </button>
@@ -233,61 +223,44 @@ function RegisterPurchase() {
       </div>
 
       {showModal && selectedProduct && (
-        <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <Package size={24} />
-                <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Sumar al Inventario</h2>
-              </div>
-              <button onClick={() => setShowModal(false)} style={styles.closeBtn}>
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><Package size={24} /> Sumar al Inventario</h2>
+              <button onClick={() => setShowModal(false)} className="modal-close">
                 <X size={24} />
               </button>
             </div>
 
-            <form onSubmit={handleConfirmPurchase} style={{ padding: '24px' }}>
-              <p style={{ color: theme.text, marginBottom: '20px', fontSize: '1.05rem', lineHeight: '1.5' }}>
-                ¿Cuántas unidades de <strong>{selectedProduct.nombre}</strong> compraste?
+            <form onSubmit={handleConfirmPurchase} className="modal-body">
+              <p style={{ margin: '0 0 20px 0', fontSize: '1.05rem', lineHeight: '1.5' }}>
+                ¿Cuántas unidades de <strong style={{ color: 'var(--primary)' }}>{selectedProduct.nombre}</strong> compraste?
               </p>
               
-              <div style={{ display: 'flex', gap: '15px', marginBottom: '24px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.textMuted, marginBottom: '8px', fontWeight: '500' }}>
-                    Cantidad
-                  </label>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Cantidad</label>
                   <input
-                    type="number" min="1" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `2px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                    type="number" min="1" className="form-input" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
+                    style={{ textAlign: 'center', fontSize: '18px' }}
                   />
                 </div>
                 
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.textMuted, marginBottom: '8px', fontWeight: '500' }}>
-                    Precio Unit. ($)
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">Precio Unit. ($)</label>
                   <input
-                    type="number" min="0" step="0.01" placeholder="Opcional" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)}
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `2px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                    type="number" min="0" step="0.01" className="form-input" placeholder="Opcional" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)}
+                    style={{ textAlign: 'center', fontSize: '18px' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
+              <div className="modal-footer">
+                <button type="button" onClick={() => setShowModal(false)} className="btn btn-secondary">Cancelar</button>
                 <button 
                   type="submit" 
                   disabled={isPurchasing}
-                  style={{ 
-                    flex: 1, 
-                    padding: '12px', 
-                    borderRadius: '8px', 
-                    cursor: isPurchasing ? 'not-allowed' : 'pointer', 
-                    background: '#8b5cf6', 
-                    color: 'white', 
-                    border: 'none', 
-                    fontWeight: '600',
-                    opacity: isPurchasing ? 0.7 : 1
-                  }}
+                  className="btn btn-primary"
                 >
                   {isPurchasing ? 'Confirmando...' : 'Confirmar Compra'}
                 </button>
@@ -299,34 +272,19 @@ function RegisterPurchase() {
 
       {/* Modal de Confirmación de Cierre de Sesión */}
       {showLogoutConfirm && (
-        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <LogOut size={24} />
-                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
-              </div>
-              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}>
+        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ background: 'var(--danger)' }}>
+              <h2><LogOut size={24} /> Cerrar Sesión</h2>
+              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close">
                 <X size={24} />
               </button>
             </div>
-            <div style={{ padding: '24px', textAlign: 'center' }}>
-              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
-                ¿Estás seguro de que deseas cerrar la sesión?
-              </p>
+            <div className="modal-body" style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={() => setShowLogoutConfirm(false)} 
-                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={confirmLogout} 
-                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
-                >
-                  Sí, Salir
-                </button>
+                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
+                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
               </div>
             </div>
           </div>
@@ -335,37 +293,5 @@ function RegisterPurchase() {
     </div>
   );
 }
-
-const lightTheme = { background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85', navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb', };
-const darkTheme = { background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a', navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a', };
-
-const styles = {
-  container: { minHeight: '100vh', transition: 'background-color 0.3s' },
-  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
-  spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8b5cf6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  navbar: { padding: 'calc(15px + env(safe-area-inset-top)) 0 15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
-  navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navbarLeft: { display: 'flex', alignItems: 'center' },
-  backBtn: { background: 'transparent', border: '2px solid #8C7AE6', color: '#8C7AE6', padding: '6px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '15px', transition: 'all 0.2s ease' },
-  logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-  navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
-  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
-  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
-  content: { maxWidth: '1200px', margin: '0 auto', padding: '20px 15px 40px' },
-  headerSection: { display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' },
-  pageTitle: { margin: 0, fontSize: '24px', fontWeight: '700' },
-  searchContainer: { position: 'relative', width: '100%' },
-  searchIcon: { position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px' },
-  searchInput: { width: '100%', padding: '12px 15px 12px 45px', borderRadius: '12px', border: '2px solid', fontSize: '16px', outline: 'none', boxSizing: 'border-box' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' },
-  productCard: { padding: '15px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '15px', transition: 'transform 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
-  productName: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  categoryBadge: { backgroundColor: '#F7E7FA', color: '#8b5cf6', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600', textTransform: 'capitalize' },
-  addBtn: { width: '100%', padding: '12px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '15px' },
-  emptyState: { padding: '40px', textAlign: 'center', borderRadius: '16px' },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
-  modal: { width: '90%', maxWidth: '400px', borderRadius: '16px', overflow: 'hidden' },
-  closeBtn: { background: 'transparent', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' },
-};
 
 export default RegisterPurchase;

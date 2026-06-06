@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { Sun, Moon, LogOut, ShoppingCart, Check, Share, DollarSign, BarChart2, X } from 'lucide-react';
+import { Sun, Moon, LogOut, ShoppingCart, Share, DollarSign, BarChart2, X, Check } from 'lucide-react';
+import './ShoppingList.css';
 
 function ShoppingList() {
   const [products, setProducts] = useState([]);
@@ -34,6 +35,11 @@ function ShoppingList() {
     const newTheme = !darkMode;
     setDarkMode(newTheme);
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    if (newTheme) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
   };
 
   const loadShoppingList = async () => {
@@ -45,7 +51,6 @@ function ShoppingList() {
       setProducts(productsRes.data);
       setGroups(groupsRes.data);
       
-      // Leemos el grupo guardado en el Dashboard
       const savedGroup = localStorage.getItem('lastActiveGroup');
       if (savedGroup && groupsRes.data.some(g => g._id === savedGroup)) {
         setActiveGroup(savedGroup);
@@ -74,10 +79,7 @@ function ShoppingList() {
     const toastId = toast.loading('Registrando compra...');
 
     try {
-      // Parseamos el precio enviado
       const priceToSend = parseFloat(purchasePrice) || 0;
-
-      // Enviamos cantidad y precio a la base de datos
       await productsAPI.increaseStock(selectedProduct._id, purchaseQuantity, priceToSend);
       await productsAPI.removeFromShoppingList(selectedProduct._id);
       
@@ -151,67 +153,60 @@ function ShoppingList() {
     });
   };
 
-  //Calculamos el costo estimado total
-  //Por cada producto vemos cuantos faltan para llegar al minimo y lo multiplicamos por su precio
   const estimatedTotal = displayedProducts.reduce((total, product) => {
     const cantidadFaltante = Math.max(1, product.stock_min - product.cantidad);
     return total + ((parseFloat(product.ultimo_precio) || 0) * cantidadFaltante);
   }, 0);
 
-  const theme = darkMode ? darkTheme : lightTheme;
-
   if (loading) {
     return (
-      <div style={{ ...styles.loadingContainer, backgroundColor: theme.background }}>
-        <div style={styles.spinner}></div>
-        <p style={{ ...styles.loadingText, color: theme.text }}>Cargando lista...</p>
+      <div className="loading-container">
+        <div className="spinner"></div>
       </div>
     );
   }
 
   return (
-    <div style={{ ...styles.container, backgroundColor: theme.background }}>
-      <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
-        <div style={styles.navbarContent}>
-          <div style={styles.navbarLeft}>
-            <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>
+    <div className="page-container">
+      <nav className="navbar">
+        <div className="navbar-content">
+          <div className="navbar-left">
+            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginRight: '15px', padding: '6px 12px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
               Volver
             </button>
-            <h1 style={styles.logo}>StockApp</h1>
+            <h1 className="logo gradient-text">StockApp</h1>
           </div>
-          <div style={styles.navbarRight}>
-            <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
+          <div className="navbar-right">
+            <button onClick={toggleTheme} className="theme-btn">
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} className="logout-btn">
+              <LogOut size={14} /> Salir
+            </button>
           </div>
         </div>
       </nav>
 
-      <div style={styles.content}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ ...styles.listTitle, color: theme.text }}>Lista de Compras</h2>
-            <div style={styles.badge}>{displayedProducts.length} {displayedProducts.length === 1 ? 'ítem' : 'ítems'}</div>
+      <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
+        <div className="shopping-header">
+          <div className="list-title-row">
+            <h2 className="list-title">Lista de Compras</h2>
+            <div className="badge">{displayedProducts.length} {displayedProducts.length === 1 ? 'ítem' : 'ítems'}</div>
           </div>
           
           {groups.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="group-selector-row">
               <select
                 value={activeGroup}
                 onChange={(e) => {
                   setActiveGroup(e.target.value);
-                  localStorage.setItem('lastActiveGroup', e.target.value); // Guardamos la elección
+                  localStorage.setItem('lastActiveGroup', e.target.value);
                 }}
-                style={{
-                  flex: 1, padding: '10px 16px', borderRadius: '10px', border: `2px solid ${theme.border}`,
-                  backgroundColor: theme.cardBg, color: theme.text, fontWeight: '600', fontSize: '15px',
-                  outline: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', boxSizing: 'border-box'
-                }}
+                className="group-selector"
               >
                 {groups.map(g => (
                   <option key={g._id} value={g._id}>Lista de: {g.nombre}</option>
@@ -222,143 +217,119 @@ function ShoppingList() {
         </div>
 
         {displayedProducts.length === 0 ? (
-          <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
-            <div style={{ ...styles.emptyIcon, color: theme.textMuted }}>
+          <div className="empty-state">
+            <div className="empty-icon" style={{ color: 'var(--text-secondary)' }}>
               <ShoppingCart size={60} strokeWidth={1.5} />
             </div>
-            <h2 style={{ ...styles.emptyTitle, color: theme.text }}>La lista está vacía</h2>
-            <p style={{ ...styles.emptyText, color: theme.textMuted }}>Agrega productos desde el dashboard</p>
-            <button onClick={() => navigate('/dashboard')} style={styles.emptyBtn}>Ir al Dashboard</button>
+            <h2 className="empty-title">La lista está vacía</h2>
+            <p className="empty-text">Agrega productos desde el dashboard</p>
+            <button onClick={() => navigate('/dashboard')} className="btn btn-primary">Ir al Dashboard</button>
           </div>
         ) : (
           <>
-            <div style={styles.productList}>
+            <div className="product-grid" style={{ gridTemplateColumns: '1fr' }}>
               {displayedProducts.map((product) => (
-                <div key={product._id} style={{ ...styles.productCard, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
-                  <div style={styles.productInfo}>
-                    <div style={styles.productHeader}>
-                      <h3 style={{ ...styles.productName, color: theme.text }}>{product.nombre}</h3>
-                      <span style={styles.categoryBadge}>{product.categoria}</span>
+                <div key={product._id} className="card card-hover product-card">
+                  <div className="card-info">
+                    <div className="card-header-row">
+                      <h3 className="card-header-title">{product.nombre}</h3>
+                      <span className="category-badge">{product.categoria}</span>
                     </div>
                     
-                    <div style={styles.stockInfo}>
-                      <div style={styles.stockItem}>
-                        <span style={{ ...styles.stockLabel, color: theme.textMuted }}>Stock actual:</span>
-                        <span style={{ ...styles.stockValue, color: product.cantidad <= product.stock_min ? '#dc3545' : '#8C7AE6' }}>
-                          {product.cantidad}
-                        </span>
-                      </div>
-                      <div style={styles.stockItem}>
-                        <span style={{ ...styles.stockLabel, color: theme.textMuted }}>Stock mínimo:</span>
-                        <span style={{ ...styles.stockValue, color: theme.text }}>{product.stock_min}</span>
-                      </div>
+                    <div className="card-meta-row" style={{ marginTop: '8px' }}>
+                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Stock actual:</span>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: product.cantidad <= product.stock_min ? 'var(--danger)' : 'var(--primary)' }}>
+                        {product.cantidad}
+                      </span>
+                      <span style={{ margin: '0 8px', color: 'var(--border-color)' }}>|</span>
+                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Stock mínimo:</span>
+                      <span style={{ fontSize: '14px', fontWeight: '700' }}>{product.stock_min}</span>
                     </div>
 
                     {product.notas && (
-                      <div style={{ ...styles.notes, color: theme.textMuted }}>
-                        <span style={{ ...styles.notesLabel, color: theme.text }}>Notas:</span> {product.notas}
+                      <div className="notes">
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Notas:</span> {product.notas}
                       </div>
                     )}
                   </div>
 
-                  <div style={styles.productActions}>
-                    <button onClick={() => handleOpenPurchaseModal(product)} style={styles.removeBtn}>
-                      ✓ Comprado
+                  <div className="card-actions" style={{ gridTemplateColumns: '1fr' }}>
+                    <button 
+                      onClick={() => handleOpenPurchaseModal(product)} 
+                      className="btn btn-primary"
+                      style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}
+                    >
+                      <Check size={16} /> Comprado
                     </button>
                   </div>
                 </div>
               ))}
             </div>
 
-          {/* TARJETA DE COSTO ESTIMADO */}
-          {displayedProducts.length > 0 && (
-            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '20px 25px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginTop: '20px', marginBottom: '30px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ color: '#8C7AE6' }}><DollarSign size={32} /></span>
+            <div className="estimated-cost-card">
+              <div className="cost-info">
+                <span className="cost-icon"><DollarSign size={32} /></span>
                 <div>
-                  <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted, fontWeight: '600', textTransform: 'uppercase' }}>Costo Estimado</p>
-                  <p style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: theme.text }}>${estimatedTotal.toFixed(2)}</p>
+                  <p className="cost-label">Costo Estimado</p>
+                  <p className="cost-amount">${estimatedTotal.toFixed(2)}</p>
                 </div>
               </div>
               
-              {/* Nueva sección derecha con el botón */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+              <div className="cost-actions">
                 <button 
                   onClick={() => setShowPriceDetails(true)}
-                  style={{ padding: '6px 12px', backgroundColor: 'transparent', color: theme.text, border: `1px solid ${theme.border}`, borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', gap: '6px', alignItems: 'center' }}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '12px' }}
                 >
-                  Ver Detalles
+                  <BarChart2 size={14} /> Ver Detalles
                 </button>
               </div>
             </div>
-          )}
 
-            <div style={styles.exportSection}>
-              <button onClick={handleExport} style={{ ...styles.exportBtn, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <div className="export-section">
+              <button onClick={handleExport} className="btn btn-primary" style={{ padding: '14px 32px' }}>
                 <Share size={18} /> Exportar Lista
               </button>
-              <p style={{ ...styles.exportHint, color: theme.textMuted }}>Copia la lista para enviarla por WhatsApp</p>
+              <p className="export-hint">Copia la lista para enviarla por WhatsApp</p>
             </div>
           </>
         )}
       </div>
 
       {showPurchaseModal && selectedProduct && (
-        <div style={styles.modalOverlay} onClick={() => setShowPurchaseModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, backgroundColor: '#8b5cf6', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <ShoppingCart size={24} />
-                <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Registrar Compra</h2>
-              </div>
-              <button onClick={() => setShowPurchaseModal(false)} style={styles.closeBtn}><X size={24} /></button>
+        <div className="modal-overlay" onClick={() => setShowPurchaseModal(false)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><ShoppingCart size={24} /> Registrar Compra</h2>
+              <button onClick={() => setShowPurchaseModal(false)} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleConfirmPurchase} style={{ padding: '24px' }}>
-              <p style={{ color: theme.text, marginBottom: '20px', fontSize: '1.05rem', lineHeight: '1.5' }}>
-                ¿Cuántas unidades de <strong>{selectedProduct.nombre}</strong> agregaste al inventario?
+            <form onSubmit={handleConfirmPurchase} className="modal-body">
+              <p style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.5' }}>
+                ¿Cuántas unidades de <strong style={{ color: 'var(--primary)' }}>{selectedProduct.nombre}</strong> agregaste al inventario?
               </p>
 
-              {/* Dividimos el espacio en dos columnas para cantidad y precio */}
-              <div style={{ display: 'flex', gap: '15px', marginBottom: '24px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.text, marginBottom: '8px', fontWeight: '500' }}>
-                    Cantidad
-                  </label>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Cantidad</label>
                   <input
-                    type="number" min="1" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                    type="number" min="1" className="form-input" value={purchaseQuantity} onFocus={(e) => e.target.select()} onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)} required
+                    style={{ textAlign: 'center', fontSize: '18px' }}
                   />
                 </div>
                 
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.9rem', color: theme.text, marginBottom: '8px', fontWeight: '500' }}>
-                    Precio Unit. ($)
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">Precio Unit. ($)</label>
                   <input
-                    type="number" min="0" step="0.01" placeholder="Opcional" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)}
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '18px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', backgroundColor: theme.inputBg, color: theme.text }}
+                    type="number" min="0" step="0.01" className="form-input" placeholder="Opcional" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)}
+                    style={{ textAlign: 'center', fontSize: '18px' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: `1px solid ${theme.border}` }}>
-                <button type="button" onClick={() => setShowPurchaseModal(false)} style={{ flex: 1, padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', backgroundColor: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button 
-                  type="submit" 
-                  disabled={isPurchasing}
-                  style={{ 
-                    flex: 1, 
-                    backgroundColor: '#8b5cf6', 
-                    color: 'white', 
-                    border: 'none', 
-                    padding: '10px 24px', 
-                    borderRadius: '8px', 
-                    fontWeight: '500', 
-                    cursor: isPurchasing ? 'not-allowed' : 'pointer',
-                    opacity: isPurchasing ? 0.7 : 1
-                  }}
-                >
+              <div className="modal-footer">
+                <button type="button" onClick={() => setShowPurchaseModal(false)} className="btn btn-secondary">Cancelar</button>
+                <button type="submit" disabled={isPurchasing} className="btn btn-primary">
                   {isPurchasing ? 'Confirmando...' : 'Confirmar Compra'}
                 </button>
               </div>
@@ -367,68 +338,30 @@ function ShoppingList() {
         </div>
       )}
 
-      {/* Modal de Confirmación de Cierre de Sesión */}
-      {showLogoutConfirm && (
-        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ ...styles.modalHeader, background: '#e74c3c', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <LogOut size={24} />
-                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
-              </div>
-              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}><X size={24} /></button>
-            </div>
-            <div style={{ padding: '24px', textAlign: 'center' }}>
-              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
-                ¿Estás seguro de que deseas cerrar la sesión?
-              </p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={() => setShowLogoutConfirm(false)} 
-                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={confirmLogout} 
-                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
-                >
-                  Sí, Salir
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Detalles de Precios */}
       {showPriceDetails && (
-        <div style={styles.modalOverlay} onClick={() => setShowPriceDetails(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', background: '#8C7AE6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <BarChart2 size={24} />
-                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Desglose de Precios</h2>
-              </div>
-              <button onClick={() => setShowPriceDetails(false)} style={styles.closeBtn}><X size={24} /></button>
+        <div className="modal-overlay" onClick={() => setShowPriceDetails(false)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><BarChart2 size={24} /> Desglose de Precios</h2>
+              <button onClick={() => setShowPriceDetails(false)} className="modal-close"><X size={24} /></button>
             </div>
             
-            <div style={{ padding: '24px', maxHeight: '60vh', overflowY: 'auto' }}>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <div className="modal-body">
+              <ul className="price-details-list">
                 {displayedProducts.map(p => {
                   const cantidadFaltante = Math.max(1, p.stock_min - p.cantidad);
                   const precioUnidad = parseFloat(p.ultimo_precio) || 0;
                   const subtotal = cantidadFaltante * precioUnidad;
                   
                   return (
-                    <li key={p._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${theme.border}` }}>
+                    <li key={p._id} className="price-details-item">
                       <div>
-                        <span style={{ color: theme.text, fontWeight: '600', fontSize: '15px', display: 'block', marginBottom: '4px' }}>{p.nombre}</span>
-                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>
+                        <span className="price-details-name">{p.nombre}</span>
+                        <span className="price-details-calc">
                           {cantidadFaltante} {cantidadFaltante === 1 ? 'unidad' : 'unidades'} a ${precioUnidad.toFixed(2)} c/u
                         </span>
                       </div>
-                      <span style={{ color: theme.text, fontWeight: '700', fontSize: '15px' }}>
+                      <span className="price-details-subtotal">
                         ${subtotal.toFixed(2)}
                       </span>
                     </li>
@@ -436,62 +369,35 @@ function ShoppingList() {
                 })}
               </ul>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '15px', borderTop: `2px dashed ${theme.border}` }}>
-                <span style={{ color: theme.text, fontWeight: '700', fontSize: '16px' }}>Total Estimado</span>
-                <span style={{ color: '#8C7AE6', fontWeight: '800', fontSize: '20px' }}>${estimatedTotal.toFixed(2)}</span>
+              <div className="price-details-total-row">
+                <span style={{ fontWeight: '700', fontSize: '16px' }}>Total Estimado</span>
+                <span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '20px' }}>${estimatedTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
         </div>
-        
+      )}
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      {showLogoutConfirm && (
+        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ background: 'var(--danger)' }}>
+              <h2><LogOut size={24} /> Cerrar Sesión</h2>
+              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close"><X size={24} /></button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
+                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 }
-
-const lightTheme = { background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85', navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb' };
-const darkTheme = { background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a', navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a' };
-
-const styles = {
-  container: { minHeight: '100vh', transition: 'background-color 0.3s ease' },
-  loadingContainer: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' },
-  spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8C7AE6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  loadingText: { marginTop: '20px', fontSize: '18px' },
-  navbar: { padding: 'calc(15px + env(safe-area-inset-top)) 0 15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
-  navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navbarLeft: { display: 'flex', alignItems: 'center' },
-  backBtn: { background: 'transparent', border: '2px solid #8C7AE6', color: '#8C7AE6', padding: '6px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '15px', transition: 'all 0.2s ease' },
-  logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-  navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
-  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
-  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
-  content: { maxWidth: '1200px', margin: '0 auto', padding: '20px 15px 40px' },
-  listTitle: { margin: 0, fontSize: '24px', fontWeight: '700' },
-  badge: { backgroundColor: '#8C7AE6', color: 'white', padding: '6px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '600', boxShadow: '0 2px 8px rgba(140, 122, 230, 0.3)' },
-  productList: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  productCard: { borderRadius: '16px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)' },
-  productInfo: { flex: 1, minWidth: 0 },
-  productHeader: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' },
-  productName: { margin: 0, fontSize: '16px', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
-  categoryBadge: { backgroundColor: '#F7E7FA', color: '#8C7AE6', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', textTransform: 'capitalize' },
-  stockInfo: { display: 'flex', gap: '15px', marginBottom: '4px' },
-  stockItem: { display: 'flex', alignItems: 'center', gap: '6px' },
-  stockLabel: { fontSize: '12px', fontWeight: '500' },
-  stockValue: { fontSize: '14px', fontWeight: '700' },
-  notes: { fontSize: '12px', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
-  productActions: { display: 'flex', alignItems: 'center' },
-  removeBtn: { padding: '10px 14px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' },
-  exportSection: { marginTop: '40px', textAlign: 'center' },
-  exportBtn: { padding: '14px 32px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', transition: 'all 0.3s ease', boxShadow: '0 4px 16px rgba(140, 122, 230, 0.35)' },
-  exportHint: { marginTop: '12px', fontSize: '13px', fontWeight: '500' },
-  emptyState: { textAlign: 'center', padding: '60px 20px', borderRadius: '20px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)' },
-  emptyIcon: { fontSize: '80px', marginBottom: '20px' },
-  emptyTitle: { fontSize: '24px', fontWeight: '700', marginBottom: '10px' },
-  emptyText: { fontSize: '16px', marginBottom: '30px' },
-  emptyBtn: { padding: '14px 32px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '16px', fontWeight: '600', boxShadow: '0 4px 16px rgba(140, 122, 230, 0.3)' },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(45, 45, 45, 0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
-  modal: { borderRadius: '20px', width: '90%', maxWidth: '450px', maxHeight: '90vh', overflow: 'auto' },
-  closeBtn: { background: 'transparent', border: 'none', color: 'rgba(255, 255, 255, 0.7)', fontSize: '1.5rem', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'background-color 0.2s' },
-};
 
 export default ShoppingList;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { Sun, Moon, Plus, Users, User, UserPlus, Mail, LogOut, X, Home } from 'lucide-react';
+import './FamilyGroups.css';
 
 function FamilyGroups() {
   const [groups, setGroups] = useState([]);
@@ -45,20 +46,20 @@ function FamilyGroups() {
     const newTheme = !darkMode;
     setDarkMode(newTheme);
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    if (newTheme) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
   };
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
-    
-    // Bloqueamos el botón en la interfaz visual
     setIsCreating(true);
     const toastId = toast.loading('Creando grupo...');
 
     try {
-      // Enviamos la petición al servidor para crear el grupo
       await groupsAPI.create(newGroupName);
-      
-      // Limpiamos el formulario y actualizamos la vista
       setNewGroupName('');
       setShowCreateModal(false);
       loadGroups();
@@ -66,7 +67,6 @@ function FamilyGroups() {
     } catch (error) {
       toast.error('Error al crear el grupo', { id: toastId });
     } finally {
-      // Liberamos el botón obligatoriamente al finalizar el proceso
       setIsCreating(false);
     }
   };
@@ -100,73 +100,75 @@ function FamilyGroups() {
     navigate('/login');
   };
 
-  const theme = darkMode ? darkTheme : lightTheme;
-
   if (loading) {
     return (
-      <div style={{ ...styles.loadingContainer, backgroundColor: theme.background }}>
-        <div style={styles.spinner}></div>
+      <div className="loading-container">
+        <div className="spinner"></div>
       </div>
     );
   }
 
   return (
-    <div style={{ ...styles.container, backgroundColor: theme.background }}>
-      <nav style={{ ...styles.navbar, backgroundColor: theme.cardBg, borderBottom: `1px solid ${theme.border}` }}>
-        <div style={styles.navbarContent}>
-          <div style={styles.navbarLeft}>
-            <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>
+    <div className="page-container">
+      <nav className="navbar">
+        <div className="navbar-content">
+          <div className="navbar-left">
+            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginRight: '15px', padding: '6px 12px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
               Volver
             </button>
-            <h1 style={styles.logo}>StockApp</h1>
+            <h1 className="logo gradient-text">StockApp</h1>
           </div>
-          <div style={styles.navbarRight}>
-            <button onClick={toggleTheme} style={{ ...styles.themeBtn, color: theme.text }}>
+          <div className="navbar-right">
+            <button onClick={toggleTheme} className="theme-btn">
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button onClick={handleLogoutClick} style={styles.logoutBtn}>Salir</button>
+            <button onClick={handleLogoutClick} className="logout-btn">
+              <LogOut size={14} /> Salir
+            </button>
           </div>
         </div>
       </nav>
 
-      <div style={styles.content}>
-        <div style={styles.headerSection}>
+      <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' }}>
           <div>
-            <h2 style={{ ...styles.pageTitle, color: theme.text }}>Tus Grupos</h2>
-            <p style={{ color: theme.textMuted, marginTop: '5px' }}>Gestiona los inventarios compartidos.</p>
+            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>Tus Grupos</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Gestiona los inventarios compartidos.</p>
           </div>
-          <button onClick={() => setShowCreateModal(true)} style={{ ...styles.primaryActionBtn, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
             <Plus size={18} strokeWidth={2.5} /> Nuevo Grupo
           </button>
         </div>
 
-        <div style={styles.grid}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '15px' }}>
           {groups.length === 0 ? (
-            <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, gridColumn: '1 / -1', border: `1px solid ${theme.border}` }}>
-              <span style={{ display: 'block', marginBottom: '15px', color: theme.textMuted }}>
+            <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
+              <span style={{ display: 'block', marginBottom: '15px', color: 'var(--text-secondary)' }}>
                 <Home size={60} strokeWidth={1.5} />
               </span>
-              <h3 style={{ color: theme.text, fontSize: '1.5rem', marginBottom: '10px' }}>No tienes grupos todavía</h3>
-              <p style={{ color: theme.textMuted, fontSize: '1.1rem' }}>Crea un grupo para compartir tu inventario.</p>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>No tienes grupos todavía</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Crea un grupo para compartir tu inventario.</p>
             </div>
           ) : (
             groups.map(group => (
-              <div key={group._id} style={{ ...styles.groupCard, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}` }}>
-                <div style={styles.cardHeaderGradient}>
+              <div key={group._id} className="card card-hover group-card" style={{ padding: 0 }}>
+                <div className="group-header-gradient">
                   <h3 style={{ margin: 0, color: 'white', fontSize: '20px' }}>{group.nombre}</h3>
-                  <span style={styles.badge}>{group.members.length} miembros</span>
+                  <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.25)', color: 'white' }}>
+                    {group.members.length} miembros
+                  </span>
                 </div>
                 
                 <div style={{ padding: '20px' }}>
-                  <p style={{ color: theme.textMuted, fontSize: '0.9rem', marginBottom: '15px', fontWeight: 'bold' }}>MIEMBROS:</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '15px', fontWeight: 'bold' }}>MIEMBROS:</p>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {group.members_detail && group.members_detail.map((member, index) => (
-                      <li key={index} style={{ color: theme.text, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ backgroundColor: theme.inputBg, padding: '4px 8px', borderRadius: '6px', fontSize: '14px', border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <li key={index} style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="group-member-item">
                           <User size={14} /> {member.username === username ? `Tú (${member.username})` : member.username}
                         </span>
                       </li>
@@ -175,14 +177,10 @@ function FamilyGroups() {
                 </div>
 
                 <div style={{ padding: '0 20px 20px' }}>
-                  <button 
-                    onClick={() => openAddMemberModal(group._id)}
-                    style={{ ...styles.addMemberBtn, backgroundColor: theme.inputBg, color: theme.text, border: `2px dashed ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                  >
+                  <button onClick={() => openAddMemberModal(group._id)} className="add-member-btn">
                     <UserPlus size={16} /> Invitar Usuario
                   </button>
                 </div>
-
               </div>
             ))
           )}
@@ -190,37 +188,20 @@ function FamilyGroups() {
       </div>
 
       {showCreateModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <Users size={24} />
-                <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Crear Grupo Familiar</h2>
-              </div>
-              <button onClick={() => setShowCreateModal(false)} style={styles.closeBtn}><X size={24} /></button>
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><Users size={24} /> Crear Grupo Familiar</h2>
+              <button onClick={() => setShowCreateModal(false)} className="modal-close"><X size={24} /></button>
             </div>
-            <form onSubmit={handleCreateGroup} style={{ padding: '24px' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre del Grupo</label>
-                <input type="text" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} required style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '1rem', boxSizing: 'border-box', backgroundColor: theme.inputBg, color: theme.text }} placeholder="Ej: Familia Pérez" />
+            <form onSubmit={handleCreateGroup} className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Nombre del Grupo</label>
+                <input type="text" className="form-input" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} required placeholder="Ej: Familia Pérez" />
               </div>
-              <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
-                <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button 
-                  type="submit" 
-                  disabled={isCreating}
-                  style={{ 
-                    flex: 1, 
-                    padding: '12px', 
-                    borderRadius: '8px', 
-                    background: '#8b5cf6', 
-                    color: 'white', 
-                    border: 'none', 
-                    fontWeight: '600',
-                    cursor: isCreating ? 'not-allowed' : 'pointer',
-                    opacity: isCreating ? 0.7 : 1
-                  }}
-                >
+              <div className="modal-footer">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="btn btn-secondary">Cancelar</button>
+                <button type="submit" disabled={isCreating} className="btn btn-primary">
                   {isCreating ? 'Creando...' : 'Crear Grupo'}
                 </button>
               </div>
@@ -230,23 +211,20 @@ function FamilyGroups() {
       )}
 
       {showAddMemberModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowAddMemberModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', backgroundColor: '#8b5cf6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <Mail size={24} />
-                <h2 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>Invitar Miembro</h2>
-              </div>
-              <button onClick={() => setShowAddMemberModal(false)} style={styles.closeBtn}><X size={24} /></button>
+        <div className="modal-overlay" onClick={() => setShowAddMemberModal(false)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><Mail size={24} /> Invitar Miembro</h2>
+              <button onClick={() => setShowAddMemberModal(false)} className="modal-close"><X size={24} /></button>
             </div>
-            <form onSubmit={handleAddMember} style={{ padding: '24px' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: theme.text, fontWeight: '500' }}>Nombre de Usuario</label>
-                <input type="text" value={newMemberUsername} onChange={(e) => setNewMemberUsername(e.target.value)} required style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, fontSize: '1rem', boxSizing: 'border-box', backgroundColor: theme.inputBg, color: theme.text }} placeholder="Ingresa el username exacto..." />
+            <form onSubmit={handleAddMember} className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Nombre de Usuario</label>
+                <input type="text" className="form-input" value={newMemberUsername} onChange={(e) => setNewMemberUsername(e.target.value)} required placeholder="Ingresa el username exacto..." />
               </div>
-              <div style={{ display: 'flex', gap: '12px', borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
-                <button type="button" onClick={() => setShowAddMemberModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: 'transparent', fontWeight: '600', color: theme.text, border: `1px solid ${theme.border}` }}>Cancelar</button>
-                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', background: '#8b5cf6', color: 'white', border: 'none', fontWeight: '600' }}>Agregar</button>
+              <div className="modal-footer">
+                <button type="button" onClick={() => setShowAddMemberModal(false)} className="btn btn-secondary">Cancelar</button>
+                <button type="submit" className="btn btn-primary">Agregar</button>
               </div>
             </form>
           </div>
@@ -255,32 +233,17 @@ function FamilyGroups() {
 
       {/* Modal de Confirmación de Cierre de Sesión */}
       {showLogoutConfirm && (
-        <div style={styles.modalOverlay} onClick={() => setShowLogoutConfirm(false)}>
-          <div style={{ ...styles.modal, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, maxWidth: '400px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', background: '#e74c3c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-                <LogOut size={24} />
-                <h2 style={{ margin: 0, color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>Cerrar Sesión</h2>
-              </div>
-              <button onClick={() => setShowLogoutConfirm(false)} style={styles.closeBtn}><X size={24} /></button>
+        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ background: 'var(--danger)' }}>
+              <h2><LogOut size={24} /> Cerrar Sesión</h2>
+              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close"><X size={24} /></button>
             </div>
-            <div style={{ padding: '24px', textAlign: 'center' }}>
-              <p style={{ color: theme.text, fontSize: '1.05rem', marginBottom: '24px', lineHeight: '1.5' }}>
-                ¿Estás seguro de que deseas cerrar la sesión?
-              </p>
+            <div className="modal-body" style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={() => setShowLogoutConfirm(false)} 
-                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: 'transparent', color: theme.text, border: `1px solid ${theme.border}` }}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={confirmLogout} 
-                  style={{ flex: 1, padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', background: '#e74c3c', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)' }}
-                >
-                  Sí, Salir
-                </button>
+                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
+                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
               </div>
             </div>
           </div>
@@ -289,35 +252,5 @@ function FamilyGroups() {
     </div>
   );
 }
-
-const lightTheme = { background: '#F7E7FA', text: '#2D2D2D', textMuted: '#7A7A85', navbarBg: '#FFFFFF', cardBg: '#FFFFFF', inputBg: '#FFFFFF', border: '#e8d9eb' };
-const darkTheme = { background: '#1a1a1a', text: '#FFFFFF', textMuted: '#9a9a9a', navbarBg: '#2D2D2D', cardBg: '#2D2D2D', inputBg: '#3a3a3a', border: '#4a4a4a' };
-
-const styles = {
-  container: { minHeight: '100vh', transition: 'background-color 0.3s' },
-  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
-  spinner: { width: '50px', height: '50px', border: '4px solid #e8d9eb', borderTop: '4px solid #8b5cf6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  navbar: { padding: 'calc(15px + env(safe-area-inset-top)) 0 15px 0', marginBottom: '15px', position: 'sticky', top: 0, zIndex: 100, transition: 'all 0.3s ease' },
-  navbarContent: { maxWidth: '1400px', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navbarLeft: { display: 'flex', alignItems: 'center' },
-  backBtn: { background: 'transparent', border: '2px solid #8C7AE6', color: '#8C7AE6', padding: '6px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '15px', transition: 'all 0.2s ease' },
-  logo: { margin: 0, fontSize: '20px', fontWeight: '800', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-  navbarRight: { display: 'flex', gap: '8px', alignItems: 'center' },
-  themeBtn: { width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', background: 'transparent', border: 'none' },
-  logoutBtn: { padding: '8px 12px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '700', transition: 'all 0.3s ease' },
-  content: { maxWidth: '1200px', margin: '0 auto', padding: '20px 15px 40px' },
-  headerSection: { display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' },
-  pageTitle: { margin: 0, fontSize: '24px', fontWeight: '700' },
-  primaryActionBtn: { padding: '12px 28px', background: 'linear-gradient(135deg, #8C7AE6 0%, #6B5BC9 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', boxShadow: '0 4px 12px rgba(140, 122, 230, 0.3)' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '15px' },
-  groupCard: { borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column' },
-  cardHeaderGradient: { background: 'linear-gradient(135deg, #8C7AE6 0%, #C7C8F4 100%)', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  badge: { backgroundColor: 'rgba(255,255,255,0.25)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '600', backdropFilter: 'blur(10px)' },
-  addMemberBtn: { width: '100%', padding: '12px', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', transition: 'all 0.2s' },
-  emptyState: { padding: '60px 20px', textAlign: 'center', borderRadius: '16px' },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
-  modal: { width: '90%', maxWidth: '450px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' },
-  closeBtn: { background: 'transparent', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' },
-};
 
 export default FamilyGroups;
