@@ -4,7 +4,7 @@ import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Package, Plus, ShoppingCart, 
-  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode
+  ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode
 } from 'lucide-react';
 import './Dashboard.css';
 import BarcodeScanner from '../components/BarcodeScanner';
@@ -14,7 +14,6 @@ function Dashboard() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -38,10 +37,10 @@ function Dashboard() {
   const [scanningFor, setScanningFor] = useState(null); // 'search', 'create', 'edit'
   
   const navigate = useNavigate();
-  const username = localStorage.getItem('username');
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -258,22 +257,22 @@ function Dashboard() {
               setShowModal(true);
             }
           }} 
-          className="btn btn-primary" style={{ height: '100px', flexDirection: 'column', gap: '12px' }}
+          className="btn btn-primary" style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '8px', borderRadius: 'var(--radius-lg)' }}
         >
-          <Plus size={28} strokeWidth={2.5} /> 
-          <span style={{ fontSize: '1.05rem' }}>Nuevo Producto</span>
+          <Plus size={24} /> 
+          <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Nuevo Producto</span>
         </button>
         
-        <button onClick={() => navigate('/register-purchase')} className="btn btn-secondary" style={{ height: '100px', flexDirection: 'column', gap: '12px' }}>
-          <ShoppingCart size={28} /> 
-          <span style={{ fontSize: '1.05rem' }}>Ingresar Stock</span>
+        <button onClick={() => navigate('/register-purchase')} className="btn btn-secondary" style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '8px', borderRadius: 'var(--radius-lg)' }}>
+          <ShoppingCart size={24} /> 
+          <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Ingresar Stock</span>
         </button>
         
-        <button onClick={() => navigate('/shopping-list')} className="btn btn-secondary" style={{ height: '100px', flexDirection: 'column', gap: '12px', position: 'relative' }}>
-          <ClipboardList size={28} /> 
-          <span style={{ fontSize: '1.05rem' }}>Lista Compras</span>
+        <button onClick={() => navigate('/shopping-list')} className="btn btn-secondary" style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', borderRadius: 'var(--radius-lg)' }}>
+          <ClipboardList size={24} /> 
+          <span style={{ fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Lista Compras</span>
           {products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length > 0 && (
-            <span style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
               {products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length}
             </span>
           )}

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { Plus, Users, User, UserPlus, Mail, X, Home } from 'lucide-react';
@@ -8,7 +7,6 @@ import './FamilyGroups.css';
 function FamilyGroups() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -18,7 +16,6 @@ function FamilyGroups() {
   const [newMemberUsername, setNewMemberUsername] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const navigate = useNavigate();
   const username = localStorage.getItem('username');
 
   useEffect(() => {

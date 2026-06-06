@@ -1,29 +1,52 @@
-import React, { useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import React, { useEffect } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
 import { X } from 'lucide-react';
 
 const BarcodeScanner = ({ onScan, onClose }) => {
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      false
-    );
+    const html5QrCode = new Html5Qrcode("reader");
+    let isScanning = false;
 
-    scanner.render(
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
       (decodedText) => {
-        scanner.clear();
-        onScan(decodedText);
+        if (isScanning) {
+          isScanning = false;
+          html5QrCode.stop().then(() => {
+            onScan(decodedText);
+          }).catch(err => console.error("Error stopping scanner", err));
+        }
       },
       (error) => {
-        // Silently ignore scan errors (it errors on every frame that doesn't have a barcode)
+        // Silently ignore scan errors
       }
-    );
+    ).then(() => {
+      isScanning = true;
+    }).catch(err => {
+      console.error("Error starting environment camera", err);
+      // Fallback
+      html5QrCode.start(
+        { facingMode: "user" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          if (isScanning) {
+            isScanning = false;
+            html5QrCode.stop().then(() => onScan(decodedText));
+          }
+        },
+        () => {}
+      ).then(() => {
+        isScanning = true;
+      }).catch(e => alert("No se pudo acceder a la cámara. Por favor verifica los permisos."));
+    });
 
     return () => {
-      scanner.clear().catch(error => {
-        console.error("Failed to clear html5QrcodeScanner. ", error);
-      });
+      if (isScanning) {
+        html5QrCode.stop().catch(error => {
+          console.error("Failed to clear scanner ", error);
+        });
+      }
     };
   }, [onScan]);
 

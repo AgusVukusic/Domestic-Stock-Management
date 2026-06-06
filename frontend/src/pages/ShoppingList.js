@@ -10,7 +10,6 @@ function ShoppingList() {
   const [groups, setGroups] = useState([]);
   const [activeGroup, setActiveGroup] = useState(''); 
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);

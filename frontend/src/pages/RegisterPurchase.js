@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { productsAPI, groupsAPI } from '../services/api';
-import { ShoppingCart, Search, Plus, Package, X, ScanBarcode, Camera, Users } from 'lucide-react';
+import { Package, Plus, ScanBarcode, Camera, Search, Users, X } from 'lucide-react';
 import './RegisterPurchase.css';
 import BarcodeScanner from '../components/BarcodeScanner';
 
@@ -10,7 +9,6 @@ function RegisterPurchase() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [groups, setGroups] = useState([]);
   const [activeGroup, setActiveGroup] = useState('');
   
@@ -23,7 +21,6 @@ function RegisterPurchase() {
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
@@ -161,44 +158,51 @@ function RegisterPurchase() {
           </div>
           
           <div className="glass-panel" style={{ padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                <Users size={18} /> Comprando para:
-              </span>
-              <select
-                value={activeGroup}
-                onChange={(e) => {
-                  setActiveGroup(e.target.value);
-                  localStorage.setItem('lastActiveGroup', e.target.value);
-                }}
-                className="form-input"
-                style={{ borderRadius: 'var(--radius-full)', maxWidth: '300px' }}
-              >
-                {groups.map(g => (
-                  <option key={g._id} value={g._id}>{g.nombre}</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', width: '100%', flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative', flex: '1 1 250px' }}>
-                <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
-                  <Search size={18} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  <Users size={16} /> Grupo:
                 </span>
-                <input 
-                  type="text" 
-                  placeholder="Buscar producto por nombre..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                <select
+                  value={activeGroup}
+                  onChange={(e) => {
+                    setActiveGroup(e.target.value);
+                    localStorage.setItem('lastActiveGroup', e.target.value);
+                  }}
                   className="form-input"
-                  style={{ paddingLeft: '45px', borderRadius: 'var(--radius-full)' }}
-                />
+                  style={{ borderRadius: 'var(--radius-full)', flex: 1, padding: '10px 14px', maxWidth: '65%' }}
+                >
+                  {groups.map(g => (
+                    <option key={g._id} value={g._id}>{g.nombre}</option>
+                  ))}
+                </select>
               </div>
-              <button onClick={() => setShowBarcodeScanner(true)} className="btn btn-secondary" title="Escanear Código" style={{ borderRadius: 'var(--radius-full)' }}>
-                <ScanBarcode size={20} /> <span style={{ marginLeft: '8px' }}>Código</span>
-              </button>
-              <button onClick={() => fileInputRef.current?.click()} className="btn btn-primary" title="Escanear Ticket" disabled={isScanningReceipt} style={{ borderRadius: 'var(--radius-full)' }}>
-                <Camera size={20} /> <span style={{ marginLeft: '8px' }}>Ticket Inteligente</span>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
+                    <Search size={18} />
+                  </span>
+                  <input 
+                    type="text" 
+                    placeholder="Buscar producto..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="form-input"
+                    style={{ paddingLeft: '40px', paddingRight: '40px', borderRadius: 'var(--radius-full)', width: '100%' }}
+                  />
+                  <button 
+                    onClick={() => setShowBarcodeScanner(true)} 
+                    style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'var(--card-bg)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-primary)', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}
+                    title="Escanear Código"
+                  >
+                    <ScanBarcode size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <button onClick={() => fileInputRef.current?.click()} className="btn btn-primary" title="Escanear Ticket" disabled={isScanningReceipt} style={{ borderRadius: 'var(--radius-full)', width: '100%', padding: '14px' }}>
+                <Camera size={20} /> <span style={{ marginLeft: '8px' }}>{isScanningReceipt ? 'Procesando...' : 'Escanear Ticket Inteligente'}</span>
                 <input type="file" ref={fileInputRef} onChange={handleReceiptUpload} accept="image/*" style={{ display: 'none' }} />
               </button>
             </div>
@@ -212,10 +216,10 @@ function RegisterPurchase() {
             </div>
           ) : (
             displayedProducts.map(product => (
-              <div key={product._id} className="card card-hover product-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '15px' }}>
+              <div key={product._id} className="card card-hover" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>{product.nombre}</h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
                     <span className="category-badge">{product.categoria}</span>
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Stock actual: <strong>{product.cantidad}</strong></span>
                   </div>
@@ -223,7 +227,7 @@ function RegisterPurchase() {
                 <button 
                   onClick={() => handleOpenModal(product)}
                   className="btn btn-primary"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '12px' }}
                 >
                   <Plus size={18} strokeWidth={2.5} /> Agregar Stock
                 </button>
