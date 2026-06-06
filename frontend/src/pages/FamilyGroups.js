@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { Sun, Moon, Plus, Users, User, UserPlus, Mail, LogOut, X, Home } from 'lucide-react';
+import { Plus, Users, User, UserPlus, Mail, X, Home } from 'lucide-react';
 import './FamilyGroups.css';
 
 function FamilyGroups() {
@@ -16,8 +16,7 @@ function FamilyGroups() {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [newMemberUsername, setNewMemberUsername] = useState('');
-  
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [newMemberUsername, setNewMemberUsername] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   const navigate = useNavigate();
@@ -25,10 +24,6 @@ function FamilyGroups() {
 
   useEffect(() => {
     loadGroups();
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-    }
   }, []);
 
   const loadGroups = async () => {
@@ -42,16 +37,7 @@ function FamilyGroups() {
     }
   };
 
-  const toggleTheme = () => {
-    const newTheme = !darkMode;
-    setDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    if (newTheme) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  };
+
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
@@ -90,15 +76,7 @@ function FamilyGroups() {
     setShowAddMemberModal(true);
   };
 
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
 
-  const confirmLogout = () => {
-    localStorage.clear();
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    navigate('/login');
-  };
 
   if (loading) {
     return (
@@ -109,29 +87,7 @@ function FamilyGroups() {
   }
 
   return (
-    <div className="page-container">
-      <nav className="navbar">
-        <div className="navbar-content">
-          <div className="navbar-left">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginRight: '15px', padding: '6px 12px' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              Volver
-            </button>
-            <h1 className="logo gradient-text">StockApp</h1>
-          </div>
-          <div className="navbar-right">
-            <button onClick={toggleTheme} className="theme-btn">
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button onClick={handleLogoutClick} className="logout-btn">
-              <LogOut size={14} /> Salir
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div className="page-container animate-slide-up">
 
       <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' }}>
@@ -231,24 +187,7 @@ function FamilyGroups() {
         </div>
       )}
 
-      {/* Modal de Confirmación de Cierre de Sesión */}
-      {showLogoutConfirm && (
-        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'var(--danger)' }}>
-              <h2><LogOut size={24} /> Cerrar Sesión</h2>
-              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close"><X size={24} /></button>
-            </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
-                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

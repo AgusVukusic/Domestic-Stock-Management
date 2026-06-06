@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { Sun, Moon, LogOut, ShoppingCart, Share, DollarSign, BarChart2, X, Check } from 'lucide-react';
+import { ShoppingCart, Share, DollarSign, BarChart2, X, Check } from 'lucide-react';
 import './ShoppingList.css';
 
 function ShoppingList() {
@@ -18,29 +18,11 @@ function ShoppingList() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchasePrice, setPurchasePrice] = useState('');
   
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPriceDetails, setShowPriceDetails] = useState(false);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadShoppingList();
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-    }
   }, []);
-
-  const toggleTheme = () => {
-    const newTheme = !darkMode;
-    setDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    if (newTheme) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  };
 
   const loadShoppingList = async () => {
     try {
@@ -94,15 +76,7 @@ function ShoppingList() {
     }
   };
 
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
 
-  const confirmLogout = () => {
-    localStorage.clear();
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    navigate('/login');
-  };
 
   const displayedProducts = products.filter(p => p.owner_id === activeGroup);
 
@@ -188,30 +162,7 @@ function ShoppingList() {
   }
 
   return (
-    <div className="page-container">
-      <nav className="navbar">
-        <div className="navbar-content">
-          <div className="navbar-left">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginRight: '15px', padding: '6px 12px' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              Volver
-            </button>
-            <h1 className="logo gradient-text">StockApp</h1>
-          </div>
-          <div className="navbar-right">
-            <button onClick={toggleTheme} className="theme-btn">
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button onClick={handleLogoutClick} className="logout-btn">
-              <LogOut size={14} /> Salir
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="page-container animate-slide-up">
       <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
         <div className="shopping-header">
           <div className="list-title-row">
@@ -399,25 +350,7 @@ function ShoppingList() {
         </div>
       )}
 
-      {/* Modal de Confirmación de Cierre de Sesión */}
-      {showLogoutConfirm && (
-        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'var(--danger)' }}>
-              <h2><LogOut size={24} /> Cerrar Sesión</h2>
-              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close"><X size={24} /></button>
-            </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
-                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+
   );
 }
 

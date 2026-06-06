@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { productsAPI, groupsAPI } from '../services/api';
-import { Sun, Moon, ShoppingCart, Search, Plus, Package, LogOut, X, ScanBarcode, Camera } from 'lucide-react';
+import { ShoppingCart, Search, Plus, Package, X, ScanBarcode, Camera, Users } from 'lucide-react';
 import './RegisterPurchase.css';
 import BarcodeScanner from '../components/BarcodeScanner';
 
@@ -24,16 +24,11 @@ function RegisterPurchase() {
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
   const fileInputRef = useRef(null);
   
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-    }
   }, []);
 
   const loadData = async () => {
@@ -59,16 +54,7 @@ function RegisterPurchase() {
     }
   };
 
-  const toggleTheme = () => {
-    const newTheme = !darkMode;
-    setDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    if (newTheme) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  };
+  // Themes and Logout are handled by Navigation.js
 
   const handleOpenModal = (product) => {
     setSelectedProduct(product);
@@ -103,15 +89,7 @@ function RegisterPurchase() {
     }
   };
 
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
 
-  const confirmLogout = () => {
-    localStorage.clear();
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    navigate('/login');
-  };
 
   const handleBarcodeScan = async (decodedText) => {
     setShowBarcodeScanner(false);
@@ -176,80 +154,56 @@ function RegisterPurchase() {
   }
 
   return (
-    <div className="page-container">
-      <nav className="navbar">
-        <div className="navbar-content">
-          <div className="navbar-left">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginRight: '15px', padding: '6px 12px' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              Volver
-            </button>
-            <h1 className="logo gradient-text">StockApp</h1>
-          </div>
-          <div className="navbar-right">
-            <button onClick={toggleTheme} className="theme-btn">
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button onClick={handleLogoutClick} className="logout-btn">
-              <LogOut size={14} /> Salir
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="page-container animate-slide-up">
       <div className="content-wrapper animate-fade-in" style={{ maxWidth: '1200px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '25px', gap: '15px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 'var(--spacing-xl)', gap: '15px' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>Registrar Compra</h2>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Busca el producto y suma stock rápidamente.</p>
+            <h2 style={{ fontSize: '2rem', margin: 0 }}>Registrar Compra</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Busca el producto, escanea o toma una foto del ticket para sumar stock rápidamente.</p>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
-            <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShoppingCart size={18} /> Comprando para:
-            </span>
-            <select
-              value={activeGroup}
-              onChange={(e) => {
-                setActiveGroup(e.target.value);
-                localStorage.setItem('lastActiveGroup', e.target.value);
-              }}
-              style={{ 
-                padding: '8px 12px', borderRadius: '10px', flex: 1,
-                backgroundColor: 'var(--input-bg)', color: 'var(--text-primary)', 
-                border: '2px solid var(--border-color)', outline: 'none' 
-              }}
-            >
-              {groups.map(g => (
-                <option key={g._id} value={g._id}>{g.nombre}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
-                <Search size={18} />
+          <div className="glass-panel" style={{ padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                <Users size={18} /> Comprando para:
               </span>
-              <input 
-                type="text" 
-                placeholder="Buscar producto..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+              <select
+                value={activeGroup}
+                onChange={(e) => {
+                  setActiveGroup(e.target.value);
+                  localStorage.setItem('lastActiveGroup', e.target.value);
+                }}
                 className="form-input"
-                style={{ paddingLeft: '45px' }}
-              />
+                style={{ borderRadius: 'var(--radius-full)', maxWidth: '300px' }}
+              >
+                {groups.map(g => (
+                  <option key={g._id} value={g._id}>{g.nombre}</option>
+                ))}
+              </select>
             </div>
-            <button onClick={() => setShowBarcodeScanner(true)} className="btn btn-secondary" title="Escanear Código" style={{ padding: '0 15px' }}>
-              <ScanBarcode size={20} />
-            </button>
-            <button onClick={() => fileInputRef.current?.click()} className="btn btn-primary" title="Escanear Ticket" disabled={isScanningReceipt} style={{ padding: '0 15px' }}>
-              <Camera size={20} />
-              <input type="file" ref={fileInputRef} onChange={handleReceiptUpload} accept="image/*" style={{ display: 'none' }} />
-            </button>
+
+            <div style={{ display: 'flex', gap: '10px', width: '100%', flexWrap: 'wrap' }}>
+              <div style={{ position: 'relative', flex: '1 1 250px' }}>
+                <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
+                  <Search size={18} />
+                </span>
+                <input 
+                  type="text" 
+                  placeholder="Buscar producto por nombre..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="form-input"
+                  style={{ paddingLeft: '45px', borderRadius: 'var(--radius-full)' }}
+                />
+              </div>
+              <button onClick={() => setShowBarcodeScanner(true)} className="btn btn-secondary" title="Escanear Código" style={{ borderRadius: 'var(--radius-full)' }}>
+                <ScanBarcode size={20} /> <span style={{ marginLeft: '8px' }}>Código</span>
+              </button>
+              <button onClick={() => fileInputRef.current?.click()} className="btn btn-primary" title="Escanear Ticket" disabled={isScanningReceipt} style={{ borderRadius: 'var(--radius-full)' }}>
+                <Camera size={20} /> <span style={{ marginLeft: '8px' }}>Ticket Inteligente</span>
+                <input type="file" ref={fileInputRef} onChange={handleReceiptUpload} accept="image/*" style={{ display: 'none' }} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -329,26 +283,7 @@ function RegisterPurchase() {
         </div>
       )}
 
-      {/* Modal de Confirmación de Cierre de Sesión */}
-      {showLogoutConfirm && (
-        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'var(--danger)' }}>
-              <h2><LogOut size={24} /> Cerrar Sesión</h2>
-              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close">
-                <X size={24} />
-              </button>
-            </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
-                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {showBarcodeScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowBarcodeScanner(false)} />}
     </div>

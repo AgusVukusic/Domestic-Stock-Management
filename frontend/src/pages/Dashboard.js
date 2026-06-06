@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { productsAPI, groupsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
-  Package, Sun, Moon, LogOut, Plus, ShoppingCart, 
-  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode
+  Package, Plus, ShoppingCart, 
+  Users, ClipboardList, Search, Edit2, Trash2, Minus, Check, X, ScanBarcode, TrendingUp
 } from 'lucide-react';
 import './Dashboard.css';
 import BarcodeScanner from '../components/BarcodeScanner';
@@ -17,7 +17,6 @@ function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [processingListId, setProcessingListId] = useState(null);
 
@@ -43,10 +42,6 @@ function Dashboard() {
 
   useEffect(() => {
     loadData();
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-    }
   }, []);
 
   const loadData = async () => {
@@ -72,26 +67,7 @@ function Dashboard() {
     }
   };
 
-  const toggleTheme = () => {
-    const newTheme = !darkMode;
-    setDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    if (newTheme) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  };
-
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = () => {
-    localStorage.clear();
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    navigate('/login');
-  };
+  // Themes and Logout are now handled by Navigation.js
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -244,122 +220,112 @@ function Dashboard() {
   }
 
   return (
-    <div className="dashboard-container">
-      
-      <nav className="navbar">
-        <div className="navbar-content">
-          <div className="navbar-left">
-            <h1 className="logo gradient-text">
-              <Package size={28} color="#8C7AE6" /> Stock App
-            </h1>
-          </div>
-          <div className="navbar-right">
-            <button onClick={toggleTheme} className="theme-btn">
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <span className="username">{username}</span>
-            <button onClick={handleLogoutClick} className="logout-btn">
-              <LogOut size={14} /> Salir
-            </button>
-          </div>
+    <div className="page-container animate-slide-up">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-xl)' }}>
+        <div>
+          <h2 style={{ fontSize: '2rem', margin: 0 }}>Inventario</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Gestiona tus productos y existencias</p>
         </div>
-      </nav>
-
-      <div className="actions-container animate-fade-in">
-        <div className="actions-card">
-          <button 
-            onClick={() => {
-              if (groups.length === 0) {
-                toast.error("Primero debes crear un Grupo Familiar");
-                navigate('/groups');
-              } else {
-                setFormData({...formData, owner_id: activeGroup});
-                setShowModal(true);
-              }
-            }} 
-            className="action-btn action-btn-primary"
-          >
-            <Plus size={18} strokeWidth={2.5} /> Nuevo Producto
-          </button>
-          <button onClick={() => navigate('/register-purchase')} className="action-btn">
-            <ShoppingCart size={18} /> Registrar Compra
-          </button>
-          <button onClick={() => navigate('/groups')} className="action-btn">
-            <Users size={18} /> Grupos Familiares
-          </button>
-          <button onClick={() => navigate('/shopping-list')} className="action-btn action-btn-success">
-            <ClipboardList size={18} /> Lista de Compras
-            <span className="badge">{products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length}</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="content-wrapper animate-fade-in">
-        <div className="inventory-header">
-          <h2 className="inventory-title">Inventario de</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>GRUPO ACTIVO</span>
           <select
             value={activeGroup}
             onChange={(e) => {
               setActiveGroup(e.target.value);
               localStorage.setItem('lastActiveGroup', e.target.value);
             }}
-            className="filter-select"
+            style={{ 
+              padding: '8px 16px', borderRadius: 'var(--radius-full)', 
+              background: 'var(--card-bg)', color: 'var(--text-primary)', 
+              border: '1px solid var(--border-color)', outline: 'none',
+              fontWeight: 600, boxShadow: 'var(--shadow-sm)'
+            }}
           >
             {groups.map(g => (
               <option key={g._id} value={g._id}>{g.nombre}</option>
             ))}
           </select>
         </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-xl)' }}>
+        <button onClick={() => {
+            if (groups.length === 0) {
+              toast.error("Primero debes crear un Grupo Familiar");
+              navigate('/groups');
+            } else {
+              setFormData({...formData, owner_id: activeGroup});
+              setShowModal(true);
+            }
+          }} 
+          className="btn btn-primary" style={{ height: '100px', flexDirection: 'column', gap: '12px' }}
+        >
+          <Plus size={28} strokeWidth={2.5} /> 
+          <span style={{ fontSize: '1.05rem' }}>Nuevo Producto</span>
+        </button>
+        
+        <button onClick={() => navigate('/register-purchase')} className="btn btn-secondary" style={{ height: '100px', flexDirection: 'column', gap: '12px' }}>
+          <ShoppingCart size={28} /> 
+          <span style={{ fontSize: '1.05rem' }}>Ingresar Stock</span>
+        </button>
+        
+        <button onClick={() => navigate('/shopping-list')} className="btn btn-secondary" style={{ height: '100px', flexDirection: 'column', gap: '12px', position: 'relative' }}>
+          <ClipboardList size={28} /> 
+          <span style={{ fontSize: '1.05rem' }}>Lista Compras</span>
+          {products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length > 0 && (
+            <span style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+              {products.filter(p => p.en_lista_compras && p.owner_id === activeGroup).length}
+            </span>
+          )}
+        </button>
+      </div>
 
         {groups.length > 0 && products.filter(p => p.owner_id === activeGroup).length > 0 && (
-          <div className="controls-container">
-            <div className="search-container" style={{ display: 'flex', gap: '10px' }}>
+          <div className="glass-panel" style={{ padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--spacing-xl)', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 300px', display: 'flex', gap: '10px' }}>
               <div style={{ position: 'relative', flex: 1 }}>
-                <span className="search-icon"><Search size={18} /></span>
+                <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}><Search size={18} /></span>
                 <input
                   type="text"
-                  placeholder="Buscar productos..."
+                  placeholder="Buscar productos por nombre o notas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="form-input search-input"
-                  style={{ paddingLeft: '45px' }}
+                  className="form-input"
+                  style={{ paddingLeft: '45px', borderRadius: 'var(--radius-full)' }}
                 />
               </div>
-              <button 
-                onClick={() => { setScanningFor('search'); setShowBarcodeScanner(true); }} 
-                className="btn btn-secondary" 
-                style={{ padding: '0 15px' }}
-              >
+              <button onClick={() => { setScanningFor('search'); setShowBarcodeScanner(true); }} className="btn-icon" style={{ borderRadius: 'var(--radius-full)' }} title="Escanear Código">
                 <ScanBarcode size={20} />
               </button>
             </div>
 
-            <div className="filters-row">
+            <div style={{ display: 'flex', gap: '10px', flex: '1 1 200px' }}>
               <select
                 value={activeCategory}
                 onChange={(e) => setActiveCategory(e.target.value)}
-                className="form-input filter-select"
+                className="form-input"
+                style={{ borderRadius: 'var(--radius-full)', flex: 1 }}
               >
-                <option value="">Filtrar categorias</option>
+                <option value="">Todas las categorías</option>
                 {groupCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
                 ))}
               </select>
 
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="form-input filter-select"
+                className="form-input"
+                style={{ borderRadius: 'var(--radius-full)', flex: 1 }}
               >
-                <option value="name-asc">A-Z</option>
-                <option value="name-desc">Z-A</option>
-                <option value="stock-asc">Stock (Asc)</option>
-                <option value="stock-desc">Stock (Desc)</option>
+                <option value="name-asc">Nombre (A-Z)</option>
+                <option value="name-desc">Nombre (Z-A)</option>
+                <option value="stock-asc">Stock (Menor a Mayor)</option>
+                <option value="stock-desc">Stock (Mayor a Menor)</option>
               </select>
             </div>
           </div>
         )}
-      </div>
 
       <div className="product-grid animate-fade-in" style={{ marginTop: '20px' }}>
         {groups.length === 0 ? (
@@ -594,24 +560,7 @@ function Dashboard() {
     </div>
     )}
 
-      {/* Modal de Confirmación de Cierre de Sesión */}
-      {showLogoutConfirm && (
-        <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'var(--danger)' }}>
-              <h2>🚪 Cerrar Sesión</h2>
-              <button onClick={() => setShowLogoutConfirm(false)} className="modal-close"><X size={24} /></button>
-            </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '1.05rem', margin: '10px 0 20px' }}>¿Estás seguro de que deseas cerrar la sesión?</p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setShowLogoutConfirm(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
-                <button onClick={confirmLogout} className="btn btn-danger" style={{ flex: 1 }}>Sí, Salir</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {showBarcodeScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowBarcodeScanner(false)} />}
     </div>
