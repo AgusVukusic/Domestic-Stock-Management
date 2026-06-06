@@ -130,8 +130,24 @@ function RegisterPurchase() {
     } catch (error) {
       console.error(error);
       const backendError = error.response?.data?.detail;
-      const fallbackMsg = 'Error al analizar el ticket. Revisa la foto o la API Key';
-      const errMsg = backendError ? `Error del servidor: ${backendError}` : fallbackMsg;
+      let errMsg = 'Error al analizar el ticket. Revisa la foto o la API Key';
+      
+      if (error.response && typeof error.response.data === 'string') {
+        if (error.response.status === 504) {
+            errMsg = 'Límite de usos de Gemini alcanzado (El servidor tardó demasiado). Por favor, espera 1 minuto y reintenta.';
+        } else if (error.response.status === 502) {
+            errMsg = 'La imagen es demasiado pesada o el servidor colapsó (502 Bad Gateway). Intenta con otra foto.';
+        } else if (error.response.status === 413) {
+            errMsg = 'La imagen es demasiado grande. Intenta recortarla o bajarle la resolución.';
+        } else {
+            errMsg = `Error de conexión (${error.response.status}). Intenta de nuevo.`;
+        }
+      } else if (backendError) {
+        errMsg = `Error del servidor: ${backendError}`;
+      } else if (!error.response) {
+        errMsg = 'Error de red. No se pudo contactar al servidor.';
+      }
+      
       toast.error(errMsg, { id: toastId, duration: 8000 });
     } finally {
       setIsScanningReceipt(false);
