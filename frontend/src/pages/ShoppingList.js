@@ -240,14 +240,18 @@ function ShoppingList() {
                         <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Notas:</span> {product.notas}
                       </div>
                     )}
+                    
+                    <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>A comprar:</span>
+                      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '2px' }}>
+                        <button onClick={() => handleQuantityChange(product._id, -1)} className="btn" style={{ width: '28px', height: '28px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-primary)', borderRadius: '6px' }}>-</button>
+                        <span style={{ width: '30px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>{product.cantidad_a_comprar || 1}</span>
+                        <button onClick={() => handleQuantityChange(product._id, 1)} className="btn" style={{ width: '28px', height: '28px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-primary)', borderRadius: '6px' }}>+</button>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="card-actions" style={{ gridTemplateColumns: 'auto 1fr', gap: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '4px' }}>
-                      <button onClick={() => handleQuantityChange(product._id, -1)} className="btn" style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-primary)' }}>-</button>
-                      <span style={{ width: '30px', textAlign: 'center', fontWeight: 'bold' }}>{product.cantidad_a_comprar || 1}</span>
-                      <button onClick={() => handleQuantityChange(product._id, 1)} className="btn" style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-primary)' }}>+</button>
-                    </div>
+                  <div className="card-actions" style={{ gridTemplateColumns: '1fr' }}>
                     <button 
                       onClick={() => handleOpenPurchaseModal(product)} 
                       className="btn btn-primary"
