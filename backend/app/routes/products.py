@@ -303,10 +303,18 @@ async def scan_receipt(
         
         for item in items:
             producto_id = item.get("producto_id")
-            cantidad = item.get("cantidad", 1)
-            precio = item.get("precio_unitario", 0.0)
             nombre = item.get("nombre", "Producto Desconocido")
             categoria = item.get("categoria", "General")
+            
+            try:
+                cantidad = int(item.get("cantidad", 1))
+            except (ValueError, TypeError):
+                cantidad = 1
+                
+            try:
+                precio = float(item.get("precio_unitario", 0.0))
+            except (ValueError, TypeError):
+                precio = 0.0
             
             if producto_id:
                 # Actualizar existente
