@@ -223,7 +223,7 @@ function Dashboard() {
       <div className="dashboard-header" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: 'var(--spacing-xl)' }}>
         <div style={{ paddingRight: '100px' }}>
           <h2 style={{ fontSize: '2rem', margin: 0 }}>Inventario</h2>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '4px', fontSize: '0.9rem' }}>Gestiona tus productos y existencias</p>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px', fontSize: '0.9rem' }}>Mantén tu hogar organizado y abastecido</p>
         </div>
         
         {groups.length > 0 && (

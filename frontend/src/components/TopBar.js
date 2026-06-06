@@ -17,7 +17,7 @@ const TopBar = ({ darkMode, toggleTheme }) => {
   };
 
   return (
-    <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px', zIndex: 1000 }}>
+    <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top, 20px) + 20px, 50px)', right: '15px', display: 'flex', gap: '8px', zIndex: 1000 }}>
       <button 
         onClick={toggleTheme} 
         style={{ 
