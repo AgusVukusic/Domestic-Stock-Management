@@ -441,7 +441,6 @@ input, textarea, select {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-sm);
-  background: var(--bg-secondary);
 }
 
 /* Skeleton Loading */
