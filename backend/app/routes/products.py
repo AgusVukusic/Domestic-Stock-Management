@@ -206,6 +206,7 @@ async def scan_receipt(
     try:
         # Obtener los productos actuales del owner_id para hacer fuzzy match
         existing_products_json = "[]"
+        existing_categories_str = "[]"
         if owner_id:
             user_products = await get_user_products(current_user.id)
             # Filtrar solo los productos del grupo actual
@@ -213,6 +214,10 @@ async def scan_receipt(
             # Extraer solo id y nombre para que no se sature el prompt
             simplified_products = [{"id": p["_id"], "nombre": p["nombre"]} for p in filtered_products]
             existing_products_json = json.dumps(simplified_products, ensure_ascii=False)
+            
+            # Extraer las categorías únicas
+            categorias = list(set([p.get("categoria", "General") for p in filtered_products if p.get("categoria")]))
+            existing_categories_str = ", ".join(categorias) if categorias else "General"
 
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
@@ -225,16 +230,23 @@ async def scan_receipt(
         Además, actúa como un motor de búsqueda difusa. Aquí tienes una lista de los productos que ya existen en nuestra base de datos (con su ID y nombre):
         {existing_products_json}
 
+        Y aquí tienes la lista de las categorías que ya utiliza el usuario: [{existing_categories_str}].
+
         Para cada producto en el ticket de compra, intenta encontrar una coincidencia lógica (incluso si tiene abreviaturas, plurales o palabras de más/menos) en la lista de productos existentes.
         Si encuentras una coincidencia, devuelve el ID del producto existente en el campo 'producto_id'. Si es un producto nuevo que no está en la base de datos, devuelve 'producto_id': null.
+
+        IMPORTANTE PARA PRODUCTOS NUEVOS:
+        1. Asigna un 'nombre' que sea natural, cotidiano, corto y fácil de leer. Por ejemplo, en lugar de "Agua de Mesa Sin TACC Bulnez Bidón x 6.5", usa simplemente "Agua Mineral" o "Agua Bidón".
+        2. Analiza el producto y asígnale la mejor 'categoria' de la lista proporcionada. Si ninguna de las categorías existentes encaja bien, inventa una categoría nueva que sea corta (1 o 2 palabras) y general (ej. Lácteos, Limpieza, Verdulería).
 
         Devuelve un JSON estrictamente con la siguiente estructura de arreglo, sin texto adicional ni bloques de markdown (ni ```json):
         [
           {{
-            "nombre": "Nombre claro del producto (corrige abreviaturas si puedes)",
+            "nombre": "Nombre natural y corto del producto",
             "cantidad": 1,
             "precio_unitario": 100.50,
-            "producto_id": "ID del producto coincidente o null"
+            "producto_id": "ID del producto coincidente o null",
+            "categoria": "Categoría existente o nueva"
           }}
         ]
         Si el ticket indica una cantidad mayor a 1 para un producto, divídelo para dar el precio unitario, o extrae la cantidad y el precio unitario que suele estar debajo. Asegúrate de que 'cantidad' sea entero y 'precio_unitario' flotante.
@@ -281,6 +293,7 @@ async def scan_receipt(
             cantidad = item.get("cantidad", 1)
             precio = item.get("precio_unitario", 0.0)
             nombre = item.get("nombre", "Producto Desconocido")
+            categoria = item.get("categoria", "General")
             
             if producto_id:
                 # Actualizar existente
@@ -292,7 +305,7 @@ async def scan_receipt(
                 product_data = {
                     "nombre": nombre,
                     "cantidad": cantidad,
-                    "categoria": "General",
+                    "categoria": categoria,
                     "stock_min": 1,
                     "owner_type": owner_type,
                     "owner_id": target_owner_id,
