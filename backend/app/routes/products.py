@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Query, status, Depends, File, UploadFile, Form
 from pydantic import BaseModel
 from typing import List, Optional
 import os
@@ -194,6 +194,7 @@ async def get_by_barcode(
 @router.post("/receipt-scan")
 async def scan_receipt(
     file: UploadFile = File(...),
+    owner_id: Optional[str] = Form(None),
     current_user: UserInDB = Depends(get_current_user)
 ):
     api_key = os.getenv("GEMINI_API_KEY")
@@ -203,21 +204,38 @@ async def scan_receipt(
     genai.configure(api_key=api_key)
     
     try:
+        # Obtener los productos actuales del owner_id para hacer fuzzy match
+        existing_products_json = "[]"
+        if owner_id:
+            user_products = await get_user_products(current_user.id)
+            # Filtrar solo los productos del grupo actual
+            filtered_products = [p for p in user_products if p.get("owner_id") == owner_id]
+            # Extraer solo id y nombre para que no se sature el prompt
+            simplified_products = [{"id": p["_id"], "nombre": p["nombre"]} for p in filtered_products]
+            existing_products_json = json.dumps(simplified_products, ensure_ascii=False)
+
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
         
         # Reducir tamaño de la imagen para evitar problemas de memoria (OOM) y acelerar el escaneo
         image.thumbnail((1024, 1024))
         
-        prompt = """
+        prompt = f"""
         Eres un asistente experto en contabilidad. Extrae los productos de este ticket de compra.
+        Además, actúa como un motor de búsqueda difusa. Aquí tienes una lista de los productos que ya existen en nuestra base de datos (con su ID y nombre):
+        {existing_products_json}
+
+        Para cada producto en el ticket de compra, intenta encontrar una coincidencia lógica (incluso si tiene abreviaturas, plurales o palabras de más/menos) en la lista de productos existentes.
+        Si encuentras una coincidencia, devuelve el ID del producto existente en el campo 'producto_id'. Si es un producto nuevo que no está en la base de datos, devuelve 'producto_id': null.
+
         Devuelve un JSON estrictamente con la siguiente estructura de arreglo, sin texto adicional ni bloques de markdown (ni ```json):
         [
-          {
+          {{
             "nombre": "Nombre claro del producto (corrige abreviaturas si puedes)",
             "cantidad": 1,
-            "precio_unitario": 100.50
-          }
+            "precio_unitario": 100.50,
+            "producto_id": "ID del producto coincidente o null"
+          }}
         ]
         Si el ticket indica una cantidad mayor a 1 para un producto, divídelo para dar el precio unitario, o extrae la cantidad y el precio unitario que suele estar debajo. Asegúrate de que 'cantidad' sea entero y 'precio_unitario' flotante.
         Si no detectas productos, devuelve [].
@@ -250,7 +268,42 @@ async def scan_receipt(
             print(f"Error parseando JSON de Gemini. Texto crudo: {text}")
             raise HTTPException(status_code=500, detail="La IA devolvió un formato inválido. Intenta con otra foto más clara.")
             
-        return {"items": items}
+        # PROCESAR ITEMS
+        actualizados = 0
+        creados = 0
+        
+        # Validar el owner_type
+        owner_type = "group" if owner_id and owner_id != current_user.id else "user"
+        target_owner_id = owner_id if owner_id else current_user.id
+        
+        for item in items:
+            producto_id = item.get("producto_id")
+            cantidad = item.get("cantidad", 1)
+            precio = item.get("precio_unitario", 0.0)
+            nombre = item.get("nombre", "Producto Desconocido")
+            
+            if producto_id:
+                # Actualizar existente
+                await increase_stock(producto_id, cantidad, current_user.id, precio)
+                await remove_from_shopping_list(producto_id, current_user.id)
+                actualizados += 1
+            else:
+                # Crear nuevo
+                product_data = {
+                    "nombre": nombre,
+                    "cantidad": cantidad,
+                    "categoria": "General",
+                    "stock_min": 1,
+                    "owner_type": owner_type,
+                    "owner_id": target_owner_id,
+                    "notas": "",
+                    "en_lista_compras": False,
+                    "ultimo_precio": precio
+                }
+                await create_product(product_data)
+                creados += 1
+            
+        return {"items": items, "actualizados": actualizados, "creados": creados}
         
     except Exception as e:
         if isinstance(e, HTTPException):

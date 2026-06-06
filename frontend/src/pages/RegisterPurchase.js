@@ -106,20 +106,24 @@ function RegisterPurchase() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const toastId = toast.loading('Analizando ticket con IA...');
+    const toastId = toast.loading('Analizando ticket y actualizando stock...');
     setIsScanningReceipt(true);
     
     const formData = new FormData();
     formData.append('file', file);
+    if (activeGroup) {
+      formData.append('owner_id', activeGroup);
+    }
     
     try {
       const res = await productsAPI.scanReceipt(formData);
       const items = res.data.items;
+      const actualizados = res.data.actualizados || 0;
+      const creados = res.data.creados || 0;
       
       if (items && items.length > 0) {
-        toast.success(`Se detectaron ${items.length} productos!`, { id: toastId });
-        console.log("Items detectados: ", items);
-        // Implementación futura: Mostrar listado para confirmar.
+        toast.success(`Ticket procesado: ${actualizados} sumados, ${creados} creados.`, { id: toastId, duration: 4000 });
+        loadData(); // Recargar datos automáticamente
       } else {
         toast.error('No se detectaron productos en el ticket.', { id: toastId });
       }
