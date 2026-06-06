@@ -266,15 +266,19 @@ async def scan_receipt(
         Si no detectas productos, devuelve [].
         """
         
-        try:
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content([prompt, image])
-        except Exception as e:
+        model_names = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision', 'gemini-1.0-pro-vision-latest']
+        response = None
+        errors = []
+        for model_name in model_names:
             try:
-                model = genai.GenerativeModel('gemini-1.5-pro')
+                model = genai.GenerativeModel(model_name)
                 response = model.generate_content([prompt, image])
-            except Exception as e2:
-                raise Exception(f"Error con la IA: {str(e)} | Fallback error: {str(e2)}")
+                break
+            except Exception as e:
+                errors.append(f"{model_name}: {str(e)}")
+                
+        if not response:
+            raise Exception(f"No se encontró un modelo válido. Errores: {' | '.join(errors)}")
         
         text = response.text.strip()
         
