@@ -532,6 +532,10 @@ function Dashboard() {
 
               <div className="form-row">
                 <div className="form-group">
+                    <label className="form-label">Stock actual</label>
+                    <input type="number" step="1" min="0" className="form-input" value={editingProduct.cantidad} onFocus={(e) => e.target.select()} onChange={(e) => setEditingProduct({ ...editingProduct, cantidad: parseInt(e.target.value) || 0 })} required placeholder="0" />
+                </div>
+                <div className="form-group">
                     <label className="form-label">Stock mínimo</label>
                     <input type="number" step="1" min="0" className="form-input" value={editingProduct.stock_min} onFocus={(e) => e.target.select()} onChange={(e) => setEditingProduct({ ...editingProduct, stock_min: parseInt(e.target.value) || 0 })} required placeholder="0" />
                 </div>
