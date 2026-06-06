@@ -19,7 +19,9 @@ def product_helper(product) -> dict:
         "owner_id": product["owner_id"],
         "en_lista_compras": product.get("en_lista_compras", False),
         "ultimo_precio": product.get("ultimo_precio", 0.0),
-        "codigo_barras": product.get("codigo_barras", None)
+        "codigo_barras": product.get("codigo_barras", None),
+        "historial_compras": product.get("historial_compras", []),
+        "cantidad_a_comprar": product.get("cantidad_a_comprar", 1)
     }
 
 async def get_access_query(user_id: str, product_id: str = None):
@@ -134,7 +136,7 @@ async def decrease_stock(product_id: str, cantidad: int, user_id: str):
     return product_helper(updated_product)
 
 async def increase_stock(product_id: str, cantidad: int, user_id: str, precio: float = 0.0):
-    """Incrementar el stock de un producto y actualizar su precio"""
+    """Incrementar el stock de un producto y actualizar su precio e historial"""
     products_collection = get_products_collection()
     query = await get_access_query(user_id, product_id)
     
@@ -149,6 +151,15 @@ async def increase_stock(product_id: str, cantidad: int, user_id: str, precio: f
     if precio > 0.0:
         update_data["ultimo_precio"] = precio
         
+    # Actualizar el historial de compras
+    historial = product.get("historial_compras", [])
+    if cantidad > 0:
+        historial.append(cantidad)
+        # Mantener solo los últimos 10 registros para no ocupar tanto espacio
+        if len(historial) > 10:
+            historial = historial[-10:]
+        update_data["historial_compras"] = historial
+        
     # Hacemos una única llamada a la base de datos con todos los cambios
     await products_collection.update_one(
         {"_id": ObjectId(product_id)},
@@ -159,7 +170,7 @@ async def increase_stock(product_id: str, cantidad: int, user_id: str, precio: f
     return product_helper(updated_product)
 
 async def add_to_shopping_list(product_id: str, user_id: str):
-    """Agregar producto a la lista de compras"""
+    """Agregar producto a la lista de compras y predecir cantidad"""
     products_collection = get_products_collection()
     query = await get_access_query(user_id, product_id)
     
@@ -167,13 +178,40 @@ async def add_to_shopping_list(product_id: str, user_id: str):
     if not product:
         return None
         
+    # Calcular predicción de cantidad a comprar
+    historial = product.get("historial_compras", [])
+    if len(historial) > 0:
+        # Promedio del historial
+        cantidad_predicha = max(1, round(sum(historial) / len(historial)))
+    else:
+        # Diferencia hasta el mínimo
+        cantidad_predicha = max(1, product.get("stock_min", 0) - product.get("cantidad", 0))
+
     await products_collection.update_one(
         {"_id": ObjectId(product_id)},
-        {"$set": {"en_lista_compras": True}}
+        {"$set": {
+            "en_lista_compras": True,
+            "cantidad_a_comprar": cantidad_predicha
+        }}
     )
     
     updated_product = await products_collection.find_one({"_id": ObjectId(product_id)})
     return product_helper(updated_product)
+
+async def update_shopping_quantity(product_id: str, user_id: str, cantidad_a_comprar: int):
+    """Actualizar manualmente la cantidad a comprar en la lista"""
+    products_collection = get_products_collection()
+    query = await get_access_query(user_id, product_id)
+    
+    result = await products_collection.update_one(
+        query,
+        {"$set": {"cantidad_a_comprar": max(1, cantidad_a_comprar)}}
+    )
+    
+    if result.modified_count > 0 or result.matched_count > 0:
+        updated_product = await products_collection.find_one({"_id": ObjectId(product_id)})
+        return product_helper(updated_product)
+    return None
 
 async def remove_from_shopping_list(product_id: str, user_id: str):
     """Quitar producto de la lista de compras"""

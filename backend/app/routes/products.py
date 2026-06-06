@@ -19,7 +19,8 @@ from ..utils.product_db import (
     add_to_shopping_list,
     remove_from_shopping_list,
     get_shopping_list,
-    get_product_by_barcode
+    get_product_by_barcode,
+    update_shopping_quantity
 )
 from ..utils.auth_middleware import get_current_user
 
@@ -169,6 +170,18 @@ async def remove_product_from_shopping_list(
     current_user: UserInDB = Depends(get_current_user)
 ):
     updated_product = await remove_from_shopping_list(product_id, current_user.id)
+    if not updated_product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
+    return updated_product
+
+# Actualizar cantidad a comprar
+@router.put("/{product_id}/shopping-quantity")
+async def update_product_shopping_quantity(
+    product_id: str,
+    cantidad: int = 1,
+    current_user: UserInDB = Depends(get_current_user)
+):
+    updated_product = await update_shopping_quantity(product_id, current_user.id, cantidad)
     if not updated_product:
         raise HTTPException(status_code=404, detail="Producto no encontrado o sin permisos")
     return updated_product

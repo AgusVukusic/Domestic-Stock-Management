@@ -58,6 +58,9 @@ export const productsAPI = {
   
   getShoppingList: () => api.get('/products/shopping-list/view'),
   
+  updateShoppingQuantity: (id, cantidad) => 
+    api.put(`/products/${id}/shopping-quantity`, null, { params: { cantidad } }),
+  
   getByBarcode: (barcode) => api.get(`/products/barcode/${barcode}`),
 
   scanReceipt: (formData) => api.post('/products/receipt-scan', formData, {

@@ -48,7 +48,7 @@ function ShoppingList() {
 
   const handleOpenPurchaseModal = (product) => {
     setSelectedProduct(product);
-    setPurchaseQuantity(1);
+    setPurchaseQuantity(product.cantidad_a_comprar || 1);
     setShowPurchaseModal(true);
     setPurchasePrice('');
   };
@@ -75,9 +75,26 @@ function ShoppingList() {
       setIsPurchasing(false);
     }
   };
-
-
-
+  const handleQuantityChange = async (productId, change) => {
+    setProducts(currentProducts => 
+      currentProducts.map(p => {
+        if (p._id === productId) {
+          const newQty = Math.max(1, (p.cantidad_a_comprar || 1) + change);
+          return { ...p, cantidad_a_comprar: newQty };
+        }
+        return p;
+      })
+    );
+    
+    try {
+      const product = products.find(p => p._id === productId);
+      const newQty = Math.max(1, (product?.cantidad_a_comprar || 1) + change);
+      await productsAPI.updateShoppingQuantity(productId, newQty);
+    } catch (error) {
+      toast.error('Error al actualizar cantidad');
+      loadShoppingList(); // revert
+    }
+  };
   const displayedProducts = products.filter(p => p.owner_id === activeGroup);
 
   const handleExport = () => {
@@ -103,7 +120,7 @@ function ShoppingList() {
       text += '━━━━━━━━━━━━━━\n';
       
       groupedByCategory[category].forEach(product => {
-        text += `• _${product.nombre}_\n`;
+        text += `• _${product.nombre}_ x${product.cantidad_a_comprar || 1}\n`;
         text += `  Stock actual: ${product.cantidad} | Mínimo: ${product.stock_min}\n`;
         if (product.notas) text += `  Nota: ${product.notas}\n`;
         text += '\n';
@@ -131,7 +148,7 @@ function ShoppingList() {
   };
 
   const estimatedTotal = displayedProducts.reduce((total, product) => {
-    const cantidadFaltante = Math.max(1, product.stock_min - product.cantidad);
+    const cantidadFaltante = product.cantidad_a_comprar || 1;
     return total + ((parseFloat(product.ultimo_precio) || 0) * cantidadFaltante);
   }, 0);
 
@@ -225,7 +242,12 @@ function ShoppingList() {
                     )}
                   </div>
 
-                  <div className="card-actions" style={{ gridTemplateColumns: '1fr' }}>
+                  <div className="card-actions" style={{ gridTemplateColumns: 'auto 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '4px' }}>
+                      <button onClick={() => handleQuantityChange(product._id, -1)} className="btn" style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-primary)' }}>-</button>
+                      <span style={{ width: '30px', textAlign: 'center', fontWeight: 'bold' }}>{product.cantidad_a_comprar || 1}</span>
+                      <button onClick={() => handleQuantityChange(product._id, 1)} className="btn" style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-primary)' }}>+</button>
+                    </div>
                     <button 
                       onClick={() => handleOpenPurchaseModal(product)} 
                       className="btn btn-primary"
@@ -321,7 +343,7 @@ function ShoppingList() {
             <div className="modal-body">
               <ul className="price-details-list">
                 {displayedProducts.map(p => {
-                  const cantidadFaltante = Math.max(1, p.stock_min - p.cantidad);
+                  const cantidadFaltante = p.cantidad_a_comprar || 1;
                   const precioUnidad = parseFloat(p.ultimo_precio) || 0;
                   const subtotal = cantidadFaltante * precioUnidad;
                   
