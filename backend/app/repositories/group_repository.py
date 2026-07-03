@@ -7,8 +7,13 @@ class GroupRepository(BaseRepository):
         super().__init__(db, "groups")
 
     async def get_groups_by_user(self, user_id: str) -> List[Dict[str, Any]]:
-        return await self.find_many({"members": user_id})
-
+        from bson import ObjectId
+        try:
+            user_obj_id = ObjectId(user_id)
+            query = {"members": {"$in": [user_id, user_obj_id]}}
+        except Exception:
+            query = {"members": user_id}
+        return await self.find_many(query)
     async def add_member(self, group_id: str, user_id: str) -> bool:
         from bson import ObjectId
         try:

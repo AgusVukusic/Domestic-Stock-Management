@@ -15,12 +15,20 @@ class GroupService:
         member_ids = group_dict.get("members", [])
         members_detail = []
         for m_id in member_ids:
-            user = await self.user_service.get_user_by_id(m_id)
+            # m_id could be ObjectId in old DBs, ensure it's str
+            user = await self.user_service.get_user_by_id(str(m_id))
             if user:
                 members_detail.append({"id": user.id, "username": user.username})
         
-        group_dict["members_detail"] = members_detail
-        return group_dict
+        return {
+            "_id": str(group_dict["_id"]),
+            "nombre": group_dict["nombre"],
+            "created_by": str(group_dict["created_by"]),
+            "members": [str(m) for m in member_ids],
+            "created_at": group_dict.get("created_at"),
+            "members_detail": members_detail
+        }
+
 
     async def create_group(self, nombre: str, user_id: str) -> Optional[GroupInDB]:
         group_data = {

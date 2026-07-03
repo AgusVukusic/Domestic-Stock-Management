@@ -29,12 +29,32 @@ class ProductService:
         user_groups = await self.group_service.get_user_groups(user_id)
         group_ids = [g.id for g in user_groups]
         
+        from bson import ObjectId
+        group_obj_ids = []
+        for g_id in group_ids:
+            try:
+                group_obj_ids.append(ObjectId(g_id))
+            except:
+                pass
+                
+        try:
+            user_obj_id = ObjectId(user_id)
+        except:
+            user_obj_id = None
+
+        user_ids = [user_id]
+        if user_obj_id:
+            user_ids.append(user_obj_id)
+            
+        all_group_ids = group_ids + group_obj_ids
+        
         return {
             "$or": [
-                {"owner_type": "user", "owner_id": user_id},
-                {"owner_type": "group", "owner_id": {"$in": group_ids}}
+                {"owner_type": "user", "owner_id": {"$in": user_ids}},
+                {"owner_type": "group", "owner_id": {"$in": all_group_ids}}
             ]
         }
+
 
     async def create_product(self, product_data: dict) -> Optional[ProductInDB]:
         product_id = await self.product_repo.insert_one(product_data)
