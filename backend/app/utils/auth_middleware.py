@@ -2,17 +2,18 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from .security import SECRET_KEY, ALGORITHM
-from .db_utils import get_user_by_id
+from ..config.dependencies import get_user_service
+from ..services.user_service import UserService
 
-#Espera un Token en el HEADER
 security = HTTPBearer()
 
-# Función para obtener el usuario actual desde el token
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)): # <-- AÑADE async AQUÍ
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user_service: UserService = Depends(get_user_service)
+):
     token = credentials.credentials
     
     try:
-        # Decodificamos el token y extramos el ID del usuario
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
@@ -26,12 +27,11 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             detail="Token inválido"
         )
     
-    # Verifica que el usuario exista
-    user = await get_user_by_id(user_id) # <-- AÑADE await AQUÍ
+    user = await user_service.get_user_by_id(user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado"
         )
     
-    return user #Si todo esta bien, devuelve el usuario
+    return user

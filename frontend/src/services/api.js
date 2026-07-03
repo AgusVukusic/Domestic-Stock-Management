@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 // URL base de tu API
 const API_URL = 'https://stock-app-backend-cg7w.onrender.com';
@@ -21,6 +22,28 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response ? error.response.status : null;
+    if (status === 401) {
+      // Si no es un error de login/register, redirigir al login
+      if (!error.config.url.includes('/auth/')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('rol');
+        window.location.href = '/login';
+      }
+    } else if (status === 403) {
+      toast.error('No tienes permisos para realizar esta acción');
+    } else if (status >= 500) {
+      toast.error('Error en el servidor. Inténtalo más tarde.');
+    }
+    
     return Promise.reject(error);
   }
 );

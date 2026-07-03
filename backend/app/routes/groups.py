@@ -4,7 +4,8 @@ from typing import List
 from ..models.group import GroupInDB
 from ..models.user import UserInDB
 from ..utils.auth_middleware import get_current_user
-from ..utils.group_db import create_group, get_user_groups, add_member_by_username
+from ..config.dependencies import get_group_service
+from ..services.group_service import GroupService
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
@@ -19,17 +20,21 @@ class AddMember(BaseModel):
 @router.post("/", response_model=GroupInDB)
 async def create_new_group(
     group: GroupCreate, 
-    current_user: UserInDB = Depends(get_current_user)
+    current_user: UserInDB = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service)
 ):
-    new_group = await create_group(group.nombre, current_user.id)
+    new_group = await group_service.create_group(group.nombre, current_user.id)
     if not new_group:
         raise HTTPException(status_code=500, detail="Error al crear el grupo")
     return new_group
 
 # Ver los grupos del usuario actual
 @router.get("/", response_model=List[GroupInDB])
-async def list_groups(current_user: UserInDB = Depends(get_current_user)):
-    groups = await get_user_groups(current_user.id)
+async def list_groups(
+    current_user: UserInDB = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service)
+):
+    groups = await group_service.get_user_groups(current_user.id)
     return groups
 
 # Agregar un miembro al grupo
@@ -37,9 +42,10 @@ async def list_groups(current_user: UserInDB = Depends(get_current_user)):
 async def add_member(
     group_id: str, 
     member_data: AddMember, 
-    current_user: UserInDB = Depends(get_current_user)
+    current_user: UserInDB = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service)
 ):
-    updated_group, error = await add_member_by_username(
+    updated_group, error = await group_service.add_member_by_username(
         group_id, 
         member_data.username, 
         current_user.id

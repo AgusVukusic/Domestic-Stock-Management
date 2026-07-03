@@ -10,6 +10,8 @@ import Navigation from './components/Navigation';
 import TopBar from './components/TopBar';
 import { Toaster } from 'react-hot-toast';
 
+import { GroupProvider } from './context/GroupContext';
+
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -49,36 +51,39 @@ function App() {
   };
 
   return (
-    <Router>
-      <Toaster 
-        position="bottom-right" 
-        toastOptions={{ 
-          style: { 
-            borderRadius: '10px', 
-            background: 'var(--card-bg)', 
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow-lg)'
-          } 
-        }} 
-      />
-      <div className="app-layout">
-        <Navigation darkMode={darkMode} toggleTheme={toggleTheme} />
-        <main className="main-content">
-          <TopBar darkMode={darkMode} toggleTheme={toggleTheme} />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-            <Route path="/shopping-list" element={<PrivateRoute><ShoppingList /></PrivateRoute>} />
-            <Route path="/register-purchase" element={<PrivateRoute><RegisterPurchase /></PrivateRoute>} />
-            <Route path="/groups" element={<PrivateRoute><FamilyGroups /></PrivateRoute>} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            <Route path="/" element={<Navigate to="/login" />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <GroupProvider>
+      <Router>
+        <Toaster 
+          position="bottom-right" 
+          toastOptions={{ 
+            style: { 
+              borderRadius: '10px', 
+              background: 'var(--card-bg)', 
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-lg)'
+            } 
+          }} 
+        />
+        <div className="app-layout">
+          <Navigation darkMode={darkMode} toggleTheme={toggleTheme} />
+          <main className="main-content">
+            <TopBar darkMode={darkMode} toggleTheme={toggleTheme} />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/shopping-list" element={<PrivateRoute><ShoppingList /></PrivateRoute>} />
+              <Route path="/register-purchase" element={<PrivateRoute><RegisterPurchase /></PrivateRoute>} />
+              <Route path="/groups" element={<PrivateRoute><FamilyGroups /></PrivateRoute>} />
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/" element={<Navigate to="/login" />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </GroupProvider>
   );
 }
+
 
 export default App;
